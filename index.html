@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>生产/人工效率看板</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f5f5f6; --card:#ffffff; --ink:#111827; --muted:#6b7280; --faint:#9ca3af;
+    --line:#e8e8ec; --line-2:#f1f1f3;
+    --accent:#4f46e5; --accent-soft:rgba(79,70,229,.09);
+    --green:#16a34a; --amber:#d97706; --red:#dc2626; --cyan:#0ea5e9; --rose:#db2777;
+    --radius:14px;
+    --shadow:0 1px 2px rgba(16,24,40,.05), 0 1px 3px rgba(16,24,40,.04);
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{height:100%;}
+  body{
+    font-family:'Noto Sans SC',system-ui,-apple-system,'Segoe UI',sans-serif;
+    background:var(--bg); color:var(--ink);
+    font-weight:500; font-size:13px; overflow:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+  .mono{font-family:'JetBrains Mono',monospace; font-variant-numeric:tabular-nums;}
+  /* ── Header ── */
+  header{
+    display:flex; align-items:center; gap:12px; padding:9px 20px;
+    background:var(--card); border-bottom:1px solid var(--line);
+  }
+  header .mark{width:12px; height:12px; border-radius:3px; background:var(--accent); box-shadow:0 0 0 4px var(--accent-soft);}
+  header .tt{line-height:1.25;}
+  header h1{font-size:22px; font-weight:800; letter-spacing:.5px; color:var(--ink);}
+  header .en{display:block; font-size:10px; letter-spacing:2px; color:var(--faint); font-weight:600; text-transform:uppercase; margin-top:2px;}
+  header .spacer{flex:1;}
+  header .clock{color:var(--muted); font-size:11px; font-family:'JetBrains Mono',monospace; font-variant-numeric:tabular-nums;}
+  .btn{
+    border:1px solid var(--line); background:#fff; color:var(--ink);
+    border-radius:8px; padding:5px 12px; font-size:12px; font-weight:600;
+    cursor:pointer; transition:all .15s; font-family:inherit;
+  }
+  .btn:hover{border-color:var(--accent); color:var(--accent);}
+  .btn-primary{background:var(--accent); border-color:var(--accent); color:#fff;}
+  .btn-primary:hover{background:#4338ca; border-color:#4338ca; color:#fff;}
+  .btn-danger{color:var(--red);}
+  .btn-danger:hover{border-color:var(--red);}
+  .btn-sm{padding:3px 9px; font-size:11px; border-radius:6px;}
+  /* ── Tabs ── */
+  nav.tabs{display:flex; gap:26px; padding:0 20px; background:var(--card); border-bottom:1px solid var(--line);}
+  nav.tabs button{
+    border:none; background:transparent; padding:12px 2px; font-size:15px; font-weight:600;
+    color:var(--muted); cursor:pointer; border-bottom:2px solid transparent;
+    font-family:inherit; letter-spacing:.3px; transition:color .15s;
+  }
+  nav.tabs button:hover{color:var(--ink);}
+  nav.tabs button.active{color:var(--ink); font-weight:650; border-bottom-color:var(--accent);}
+  main{height:calc(100vh - 80px); overflow:hidden;}
+  .page{display:none; height:100%;}
+  .page.active{display:block;}
+  /* ── 录入页 ── */
+  .input-wrap{display:grid; grid-template-columns:1fr; gap:14px; height:100%; overflow:auto; padding:16px 20px; align-content:start;}
+  .card{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:14px 16px; box-shadow:var(--shadow);}
+  .card h3{font-size:15px; font-weight:700; letter-spacing:.3px; margin-bottom:12px; display:flex; align-items:center; gap:8px;}
+  .card h3::before{content:""; width:3px; height:13px; border-radius:2px; background:var(--accent); flex-shrink:0;}
+  .card h3 .tag{font-size:11.5px; color:var(--faint); font-weight:500; letter-spacing:0;}
+  /* 总体区（深色高级卡，高饱和靛蓝点缀） */
+  .total-card{
+    background:linear-gradient(135deg,#111418 0%,#1b2029 60%,#232936 100%);
+    color:#fff; border:none; border-radius:16px; padding:16px 20px;
+    box-shadow:0 10px 30px rgba(17,20,24,.22);
+  }
+  .total-card h3{color:#fff; font-size:15.5px;}
+  .total-card h3::before{background:#818cf8;}
+  .total-card h3 .tag{color:rgba(255,255,255,.45);}
+  .total-grid{display:grid; grid-template-columns:1fr 1fr 1fr 1.2fr; gap:12px;}
+  .t-field label{display:block; font-size:10.5px; color:rgba(255,255,255,.55); font-weight:600; margin-bottom:5px; letter-spacing:.5px;}
+  .t-field input{
+    width:100%; border:1px solid rgba(255,255,255,.14); border-radius:9px; padding:7px 10px;
+    font-size:18px; font-weight:700; font-family:'JetBrains Mono',monospace; font-variant-numeric:tabular-nums;
+    background:rgba(255,255,255,.07); color:#fff; text-align:center; transition:border-color .15s, background .15s;
+  }
+  .t-field input:focus{outline:none; border-color:#818cf8; background:rgba(255,255,255,.13);}
+  .t-field input::placeholder{color:rgba(255,255,255,.4); font-size:13px; font-weight:400;}
+  .t-field .auto{font-size:11px; color:rgba(255,255,255,.5); text-align:center; margin-top:5px;}
+  .t-field .auto b{color:#fff; font-size:14px;}
+  .total-card input[type="date"]{
+    border:1px solid rgba(255,255,255,.14); border-radius:8px; padding:5px 10px;
+    background:rgba(255,255,255,.07); color:#fff; font-family:inherit; font-size:12.5px; font-weight:600;
+    color-scheme:dark;
+  }
+  .total-badge{
+    display:flex; align-items:center; justify-content:center; flex-direction:column;
+    background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); border-radius:10px; padding:6px;
+  }
+  .total-badge .l{font-size:10.5px; color:rgba(255,255,255,.55); font-weight:600; letter-spacing:.5px;}
+  .total-badge .v{font-size:24px; font-weight:700; font-family:'JetBrains Mono',monospace; line-height:1.25; color:#a5b4fc;}
+  .total-badge .s{font-size:10px; color:rgba(255,255,255,.45);}
+  /* 产线 UPH */
+  .uph-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:12px;}
+  .uph-item{border:1px solid var(--line); border-radius:12px; padding:11px 14px; background:#fbfbfc; position:relative; transition:border-color .15s, box-shadow .15s;}
+  .uph-item:hover{border-color:#d6d6db; box-shadow:0 2px 8px rgba(16,24,40,.06);}
+  .uph-item .ln{font-size:13px; font-weight:700; letter-spacing:.6px; display:flex; align-items:center; gap:7px;}
+  .uph-item .ln .dot{width:8px; height:8px; border-radius:50%;}
+  .uph-item input{
+    width:100%; border:1px solid var(--line); border-radius:8px; padding:6px 8px;
+    font-size:15px; font-weight:700; font-family:'JetBrains Mono',monospace; font-variant-numeric:tabular-nums;
+    text-align:center; margin-top:8px; background:#fff; color:var(--ink); transition:border-color .15s, box-shadow .15s;
+  }
+  .uph-item input:focus{outline:none; border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-soft);}
+  .uph-item input::placeholder{color:#d4d4d8; font-size:12px; font-weight:400;}
+  .uph-item .out{font-size:10.5px; color:var(--faint); text-align:center; margin-top:6px; letter-spacing:.3px;}
+  .sum-strip{
+    display:flex; gap:28px; margin-top:12px; padding:10px 16px;
+    background:#fafafa; border:1px solid var(--line); border-radius:10px;
+  }
+  .sum-strip .it{font-size:10.5px; color:var(--muted); letter-spacing:.4px;}
+  .sum-strip .it b{display:block; font-size:17px; font-family:'JetBrains Mono',monospace; font-variant-numeric:tabular-nums; margin-top:2px;}
+  .save-bar{display:flex; gap:10px; margin-top:14px; align-items:center;}
+  #saveMsg{font-size:11.5px; color:var(--muted);}
+  #saveMsg.err{color:var(--red);}
+  /* 加班费 */
+  .ot-card input[type="date"], .ot-card select, .ot-card input[type="number"]{
+    border:1px solid var(--line); border-radius:8px; padding:6px 10px; font-family:inherit; font-size:13px; background:#fff;
+  }
+  .ot-card input:focus, .ot-card select:focus{outline:none; border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-soft);}
+  /* 历史记录 */
+  .hist-box{overflow:auto; max-height:300px;}
+  table{width:100%; border-collapse:collapse; font-size:12px;}
+  th,td{padding:6px 10px; border-bottom:1px solid var(--line-2); text-align:center; white-space:nowrap;}
+  th{background:#fafafa; font-weight:600; color:var(--faint); position:sticky; top:0; font-size:10.5px; letter-spacing:.5px;}
+  tbody tr{transition:background .1s;}
+  tbody tr:hover td{background:#fafafa;}
+  td.num{font-family:'JetBrains Mono',monospace; font-variant-numeric:tabular-nums;}
+  .ok{color:var(--green); font-weight:600;}
+  .bad{color:var(--red); font-weight:600;}
+  .warn-c{color:var(--amber); font-weight:600;}
+  .empty-tip{color:var(--faint); text-align:center; padding:34px 0; font-size:12.5px;}
+  /* ── 看板页 ── */
+  .board-wrap{height:100%; overflow:auto; padding:16px 20px; display:flex; flex-direction:column;}
+  .nav-date{display:flex; align-items:center; justify-content:center; gap:12px; margin-bottom:14px; flex-shrink:0;}
+  .nav-date .d{font-size:16px; font-weight:700; min-width:210px; text-align:center; letter-spacing:.3px;}
+  .nav-date .d .w{color:var(--muted); font-weight:500; font-size:12px; margin-left:8px;}
+  .kpis{display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:14px; flex-shrink:0;}
+  .kpi{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:12px 16px; box-shadow:var(--shadow); position:relative; overflow:hidden;}
+  .kpi::before{content:""; position:absolute; left:0; top:0; bottom:0; width:3px;}
+  .kpi.k-out::before{background:var(--accent);}
+  .kpi.k-hours::before{background:#9ca3af;}
+  .kpi.k-uph::before{background:var(--cyan);}
+  .kpi.k-upph::before{background:var(--ink);}
+  .kpi .k{font-size:13px; color:#374151; font-weight:700; letter-spacing:.5px;}
+  .kpi .v{font-size:26px; font-weight:700; margin-top:5px; font-family:'JetBrains Mono',monospace; font-variant-numeric:tabular-nums;}
+  .kpi .v small{font-size:11px; color:var(--faint); font-weight:500; margin-left:5px;}
+  .kpi .s{font-size:10.5px; color:var(--faint); margin-top:4px;}
+  .kpi-upph .row{display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:4px;}
+  .kpi-upph .up{text-align:right; border-left:1px solid var(--line); padding-left:12px;}
+  .kpi-upph .up .k{font-size:11px; font-weight:700; color:#374151;}
+  .kpi-upph .upv{font-size:18px; font-weight:700; font-family:'JetBrains Mono',monospace; margin-top:3px;}
+  .kpi-upph .upv.up-g{color:var(--green);}
+  .kpi-upph .upv.up-b{color:var(--red);}
+  .att-kpis{display:grid; grid-template-columns:repeat(3,1fr); gap:12px;}
+  .charts{display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin-bottom:14px;}
+  .att-charts{grid-template-columns:repeat(2,1fr);}
+  .chart-card{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:10px 14px; display:flex; flex-direction:column; min-height:0; overflow:hidden; box-shadow:var(--shadow); transition:border-color .15s;}
+  .chart-card:hover{border-color:#d6d6db;}
+  .chart-card h4{font-size:14px; font-weight:700; margin-bottom:7px; flex-shrink:0; display:flex; align-items:center; gap:7px; letter-spacing:.3px; color:var(--ink);}
+  .chart-card h4 .dot{width:7px; height:7px; border-radius:50%; flex-shrink:0;}
+  .chart-card .cv{height:230px; position:relative;}
+  .att-card{flex-shrink:0;}
+  .att-card h4{font-size:13px; font-weight:700; margin-bottom:8px; display:flex; align-items:center; gap:7px;}
+  .att-card .tag{font-size:11px; color:var(--muted); font-weight:500;}
+  .att-charts .cv{height:150px; position:relative;}
+  ::-webkit-scrollbar{width:8px; height:8px;}
+  ::-webkit-scrollbar-track{background:transparent;}
+  ::-webkit-scrollbar-thumb{background:#d4d4d8; border-radius:4px;}
+  ::-webkit-scrollbar-thumb:hover{background:#bfbfc6;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="mark"></div>
+  <div class="tt">
+    <h1>生产/人工效率看板</h1>
+    <span class="en">Production / Labor Efficiency Board</span>
+  </div>
+  <div class="spacer"></div>
+  <button class="btn" onclick="exportImage()">导出长图</button>
+  <div class="clock" id="clock"></div>
+</header>
+
+<nav class="tabs">
+  <button id="tabBtn-input" onclick="switchTab('input')">数据录入</button>
+  <button id="tabBtn-board" class="active" onclick="switchTab('board')">效率看板</button>
+</nav>
+
+<main>
+  <!-- ════════ Tab1 数据录入 ════════ -->
+  <section class="page" id="page-input">
+    <div class="input-wrap">
+      <!-- 总体数据（最高等级） -->
+      <div class="card total-card">
+        <h3>总体数据 <span class="tag">等级最高 · 保存后直接显示到看板</span></h3>
+        <div style="margin-bottom:12px;">
+          <div style="display:inline-block;">
+            <label style="font-size:11.5px;color:#bfdbfe;font-weight:600;display:block;margin-bottom:4px;">日期</label>
+            <input type="date" id="fDate" onchange="loadForm(this.value)" >
+          </div>
+        </div>
+        <div class="total-grid">
+          <div class="t-field">
+            <label>📦 总产出 (台)</label>
+            <input type="number" id="fOutput" min="0" placeholder="当日总产出" oninput="calcAll()">
+          </div>
+          <div class="t-field">
+            <label>⏱ 总工时 (h)</label>
+            <input type="number" id="fHours" min="0" step="0.01" placeholder="当日总工时" oninput="calcAll()">
+          </div>
+          <div class="t-field">
+            <label>👥 总人数</label>
+            <input type="number" id="fHead" min="0" placeholder="投入总人数" oninput="calcAll()">
+          </div>
+          <div class="total-badge">
+            <div class="l">⚡ 总 UPPH（自动）</div>
+            <div class="v" id="sumUpph">-</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 四条产线 UPH 手动 -->
+      <div class="card line-card">
+        <h3>ABCD 四条产线 UPH <span class="tag">手动录入，直接输入一个数</span></h3>
+        <div class="uph-grid">
+          <div class="uph-item">
+            <div class="ln"><span class="dot" style="background:#0ea5e9;"></span>A线</div>
+            <input type="number" id="uphA" min="0" step="0.1" placeholder="UPH" oninput="calcAll()">
+            <div class="out">8h目标 3,300 台</div>
+          </div>
+          <div class="uph-item">
+            <div class="ln"><span class="dot" style="background:#4f46e5;"></span>B线</div>
+            <input type="number" id="uphB" min="0" step="0.1" placeholder="UPH" oninput="calcAll()">
+            <div class="out">8h目标 3,600 台</div>
+          </div>
+          <div class="uph-item">
+            <div class="ln"><span class="dot" style="background:#d97706;"></span>C线</div>
+            <input type="number" id="uphC" min="0" step="0.1" placeholder="UPH" oninput="calcAll()">
+            <div class="out">8h目标 3,400 台</div>
+          </div>
+          <div class="uph-item">
+            <div class="ln"><span class="dot" style="background:#db2777;"></span>D线</div>
+            <input type="number" id="uphD" min="0" step="0.1" placeholder="UPH" oninput="calcAll()">
+            <div class="out">8h目标 1,600 台</div>
+          </div>
+        </div>
+        <div class="sum-strip">
+          <div class="it">平均 UPH（A/B/C）<b style="color:var(--accent);" id="sumUph">-</b></div>
+          <div class="it">总人时（工时×人数）<b style="color:var(--ink);" id="sumPerson">-</b></div>
+        </div>
+        <div class="save-bar">
+          <button class="btn btn-primary" onclick="saveRecord()">保存到看板</button>
+          <button class="btn" onclick="clearForm()" id="btnCancel" style="display:none;">取消编辑</button>
+          <span id="saveMsg"></span>
+        </div>
+      </div>
+
+      <!-- 加班费录入（后续将自动取数） -->
+      <div class="card ot-card">
+        <h3>加班费录入 <span class="tag">按部门录入当日加班费，显示到看板</span></h3>
+        <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;">
+          <div><div style="font-size:11px;color:var(--muted);margin-bottom:4px;">日期</div><input type="date" id="otDate" onchange="renderOtList()" style="border:1px solid var(--border);border-radius:7px;padding:5px 8px;font-family:inherit;font-size:13px;"></div>
+          <div><div style="font-size:11px;color:var(--muted);margin-bottom:4px;">部门</div><select id="otDept" style="border:1px solid var(--border);border-radius:7px;padding:5px 8px;font-family:inherit;font-size:13px;min-width:130px;"></select></div>
+          <div><div style="font-size:11px;color:var(--muted);margin-bottom:4px;">加班费（฿）</div><input type="number" id="otAmount" min="0" step="0.01" placeholder="金额" style="border:1px solid var(--border);border-radius:7px;padding:5px 8px;font-family:inherit;font-size:13px;width:110px;"></div>
+          <button class="btn btn-primary" onclick="addOtCost()">添加</button>
+        </div>
+        <div id="otList" style="margin-top:10px;"></div>
+      </div>
+
+      <!-- 历史记录 -->
+      <div class="card hist-card">
+        <h3>历史记录 <span class="tag">每天一条 · 点击「编辑」回填表单</span></h3>
+        <div class="hist-box" id="histWrap"><div class="empty-tip">暂无记录，录入第一条数据吧</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════ Tab2 效率看板 ════════ -->
+  <section class="page active" id="page-board">
+    <div class="board-wrap">
+      <div class="nav-date">
+        <button class="btn" onclick="moveDate(-1)">◀</button>
+        <div class="d" id="boardDate">-</div>
+        <button class="btn" onclick="moveDate(1)">▶</button>
+        <button class="btn btn-sm" onclick="setDateToday()">今天</button>
+      </div>
+      <div class="kpis">
+        <div class="kpi k-out"><div class="k">总产出</div><div class="v" id="kpiOut">-<small>台</small></div></div>
+        <div class="kpi k-hours"><div class="k">总工时</div><div class="v" id="kpiHours">-<small>h</small></div></div>
+        <div class="kpi k-uph"><div class="k">平均 UPH（A/B/C）</div><div class="v" id="kpiUph">-<small>台/时</small></div></div>
+        <div class="kpi kpi-upph k-upph"><div class="k">总 UPPH</div><div class="row"><div class="v" id="kpiUpph">-</div><div class="up"><div class="k">提升幅度</div><div class="v upv" id="kpiUpphUp">-</div></div></div></div>
+      </div>
+      <div class="charts">
+        <div class="chart-card"><h4><span class="dot" style="background:#111827;"></span>UPPH 趋势 <span style="font-weight:500;color:var(--muted);font-size:12px;">最近7天</span></h4><div class="cv"><canvas id="chUpph"></canvas></div></div>
+        <div class="chart-card"><h4><span class="dot" style="background:#16a34a;"></span>总产出趋势 <span style="font-weight:500;color:var(--muted);font-size:12px;">最近7天</span></h4><div class="cv"><canvas id="chPlan"></canvas></div></div>
+        <div class="chart-card"><h4><span class="dot" style="background:#0ea5e9;"></span>A线 UPH 趋势 <span style="font-weight:500;color:var(--muted);font-size:12px;">最近7天</span></h4><div class="cv"><canvas id="chUphA"></canvas></div></div>
+        <div class="chart-card"><h4><span class="dot" style="background:#4f46e5;"></span>B线 UPH 趋势 <span style="font-weight:500;color:var(--muted);font-size:12px;">最近7天</span></h4><div class="cv"><canvas id="chUphB"></canvas></div></div>
+        <div class="chart-card"><h4><span class="dot" style="background:#d97706;"></span>C线 UPH 趋势 <span style="font-weight:500;color:var(--muted);font-size:12px;">最近7天</span></h4><div class="cv"><canvas id="chUphC"></canvas></div></div>
+        <div class="chart-card"><h4><span class="dot" style="background:#db2777;"></span>D线 UPH 趋势 <span style="font-weight:500;color:var(--muted);font-size:12px;">最近7天</span></h4><div class="cv"><canvas id="chUphD"></canvas></div></div>
+      </div>
+      <div class="card att-card" style="margin-bottom:16px;">
+        <h4><span class="dot" style="background:#4f46e5;"></span>出勤数据 <span class="tag" id="attUpdated" style="font-size:11px;color:var(--muted);font-weight:500;"></span></h4>
+        <div id="attWrap"></div>
+      </div>
+      <div class="card" style="margin-bottom:16px;">
+        <h4><span class="dot" style="background:#111827;"></span>当日明细</h4>
+        <div id="detailWrap"></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script src="attendance-data.js"></script>
+<script src="auto-uph.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script>
+/* ═══════════════════════════════════════════════
+   生产/人工效率看板
+   总体数据（总产出/总工时/总人数）为最高等级录入，
+   UPPH 自动 = 总产出 ÷ 总工时；平均 UPH = A/B/C 三线平均；
+   ABCD 四线 UPH 手动录入。每天一条记录，直接反映到看板。
+   存储: localStorage production_dashboard_v4
+   ═══════════════════════════════════════════════ */
+"use strict";
+
+const LINES = [
+  { id:"A", target:3300 },
+  { id:"B", target:3600 },
+  { id:"C", target:3400 },
+  { id:"D", target:1600 }
+];
+const UPH_IDS = { A:"uphA", B:"uphB", C:"uphC", D:"uphD" };
+
+const STORE_KEY = "production_dashboard_v4";
+let db = loadDB();
+function loadDB(){
+  try{
+    const raw = localStorage.getItem(STORE_KEY);
+    if(raw){
+      const arr = JSON.parse(raw);
+      arr.forEach(r=>{ if(r && r.totalHours>0) r.upph = r.totalOutput/r.totalHours; });  // UPPH = 产量÷工时
+      arr.forEach(r=>{ if(r){ const abc=[r.uphA,r.uphB,r.uphC].filter(v=>v>0); r.avgUph = abc.length ? abc.reduce((a,b)=>a+b,0)/abc.length : 0; } });  // 平均UPH = ABC三线
+      return arr;
+    }
+    // 迁移旧版本(v3)数据：只保留总体格式记录（有 totalOutput 字段）
+    const old = JSON.parse(localStorage.getItem("production_dashboard_v3") || "[]");
+    const valid = old.filter(r=>typeof r.totalOutput === "number");
+    valid.forEach(r=>{ if(r.totalHours>0) r.upph = r.totalOutput/r.totalHours; });
+    valid.forEach(r=>{ const abc=[r.uphA,r.uphB,r.uphC].filter(v=>v>0); r.avgUph = abc.length ? abc.reduce((a,b)=>a+b,0)/abc.length : 0; });
+    if(valid.length){ localStorage.setItem(STORE_KEY, JSON.stringify(valid)); }
+    return valid;
+  }catch(e){ return []; }
+}
+function persist(){
+  try{ localStorage.setItem(STORE_KEY, JSON.stringify(db)); return true; }catch(e){ return false; }
+}
+
+/* ── 工具 ── */
+const $ = id => document.getElementById(id);
+function fmt1(n){ return (Math.round(n*10)/10).toLocaleString("en-US"); }
+function fmt0(n){ return Math.round(n||0).toLocaleString("en-US"); }
+function todayStr(off){ const d=new Date(); d.setDate(d.getDate()+(off||0)); return toISO(d); }
+// 图表 y 轴上限：留出顶部空间，防止数据标签超出画布
+function topMax(arr, factor){
+  factor = factor || 1.15;
+  const vs = (arr||[]).filter(v=>v!=null && !isNaN(v));
+  if(!vs.length) return 1;
+  return Math.ceil(Math.max(...vs)*factor*10)/10;
+}
+function toISO(d){ return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+function dateFromISO(s){ const [y,m,d]=s.split("-").map(Number); return new Date(y,m-1,d); }
+const WEEK=["周日","周一","周二","周三","周四","周五","周六"];
+function fmtDateCN(s){ const d=dateFromISO(s); return (d.getMonth()+1)+"月"+d.getDate()+"日 " + WEEK[d.getDay()]; }
+
+/* ── 图表配色（统一黑白灰 + 靛蓝点缀） ── */
+const INK = "#1f2937";      // 炭墨：所有趋势线
+const ACC = "#4f46e5";      // 靛蓝：当天点 / 最高柱 / 强调
+const BAR = "#e4e4e7";      // 浅灰：普通柱体
+const BARB = "#d4d4d8";     // 浅灰边框
+const lastIdx = a => { for(let i=a.length-1;i>=0;i--){ if(a[i]!=null && a[i]!==0) return i; } return -1; };
+// 线性回归趋势线（最小二乘，对有效数据点拟合，返回同长度数组）
+const linReg = arr => {
+  const pts = [];
+  arr.forEach((v,i)=>{ if(v!=null && isFinite(v)) pts.push([i, v]); });
+  const n = pts.length;
+  if(n < 2) return arr.map(()=>null);
+  let sx=0, sy=0, sxy=0, sxx=0;
+  pts.forEach(p=>{ sx+=p[0]; sy+=p[1]; sxy+=p[0]*p[1]; sxx+=p[0]*p[0]; });
+  const m = (n*sxy - sx*sy) / (n*sxx - sx*sx);
+  const b = (sy - m*sx) / n;
+  return arr.map((v,i)=> (v!=null) ? m*i + b : null);
+};
+
+/* ── Tab 切换 ── */
+let currentTab = "board";
+function switchTab(t){
+  currentTab = t;
+  $("tabBtn-input").classList.toggle("active", t==="input");
+  $("tabBtn-board").classList.toggle("active", t==="board");
+  $("page-input").classList.toggle("active", t==="input");
+  $("page-board").classList.toggle("active", t==="board");
+  if(t==="board") renderBoard();
+}
+function switchToInput(){ switchTab("input"); }
+
+/* ── 录入页 ── */
+let editingId = null;
+
+/* ── PDT3 自动取数导入（auto-uph.js 提供，cron 每天 16:30 工作日生成） ── */
+function autoImport(){
+  const A = window.AUTO_UPH;
+  if(!A || !A.date) return;
+  const today = todayStr(0);
+  if(A.date !== today) return;                        // 只导入当天的自动数据
+  if(db.some(r=>r.date===today)) return;              // 当天已有记录（手录优先）→ 不覆盖
+  const abc = [A.uphA, A.uphB, A.uphC].filter(v=>v>0);
+  const rec = {
+    id: Date.now(), date: today,
+    totalOutput: Math.round(A.totalActual||0),        // 四线实际产量合计，可改
+    totalHours: 0, totalHead: 0,                       // 工时/人数待用户补充
+    uphA: A.uphA||0, uphB: A.uphB||0, uphC: A.uphC||0, uphD: A.uphD||0,
+    avgUph: abc.length ? abc.reduce((a,b)=>a+b,0)/abc.length : 0,
+    upph: 0, personHours: 0, updatedAt: new Date().toISOString(), autoImported: true
+  };
+  db.push(rec);
+  db.sort((a,b)=> a.date<b.date?-1:1);
+  persist();
+  renderHist();
+  // 回填表单，让用户补充工时/人数后保存
+  $("fDate").value = today;
+  loadForm(today);
+  $("saveMsg").textContent = "🤖 已自动填入 PDT3 的 ABCD UPH（" + fmtDateCN(today) + "），请补充总工时/总人数后保存";
+}
+function initForm(){
+  $("fDate").value = todayStr(-1);   // 默认昨天
+  loadForm($("fDate").value);        // 有记录自动回填，不空白
+  renderHist();
+  initOt();
+  autoImport();                      // PDT3 自动取数（16:30 后打开页面自动录入）
+}
+function loadForm(date){
+  // 打开/切换日期时，自动回填该日期已录入的数据；没有则清空
+  $("fDate").value = date;
+  const r = db.find(x=>x.date===date);
+  $("fOutput").value = ""; $("fHours").value = ""; $("fHead").value = "";
+  ["uphA","uphB","uphC","uphD"].forEach(i=>{ $(i).value=""; });
+  editingId = null;
+  $("btnCancel").style.display = "none";
+  if(!r){ $("saveMsg").textContent = ""; calcAll(); return; }
+  editingId = r.id;
+  $("fOutput").value = r.totalOutput||"";
+  $("fHours").value = r.totalHours||"";
+  $("fHead").value = r.totalHead||"";
+  $("uphA").value = r.uphA||"";
+  $("uphB").value = r.uphB||"";
+  $("uphC").value = r.uphC||"";
+  $("uphD").value = r.uphD||"";
+  $("btnCancel").style.display = "";
+  $("saveMsg").textContent = "已载入 " + fmtDateCN(r.date) + " 的记录，可直接修改后保存";
+  calcAll();
+}
+function clearForm(){
+  editingId = null;
+  $("btnCancel").style.display = "none";
+  $("fDate").value = todayStr(-1);
+  loadForm($("fDate").value);
+}
+function getUphs(){
+  const vals = LINES.map(l=>parseFloat($(UPH_IDS[l.id]).value)||0);
+  // 平均 UPH = A/B/C 三线已填值的平均（D 线不计入）
+  const abc = vals.slice(0,3).filter(v=>v>0);
+  return { vals, avg: abc.length ? abc.reduce((a,b)=>a+b,0)/abc.length : 0, filled: abc.length };
+}
+function calcAll(){
+  const output = parseFloat($("fOutput").value)||0;
+  const hours = parseFloat($("fHours").value)||0;
+  const head = parseFloat($("fHead").value)||0;
+  const { avg, filled } = getUphs();
+  $("sumUph").textContent = filled ? fmt1(avg) : "-";
+  $("sumPerson").textContent = fmt1(hours*head) + " h";
+  $("sumUpph").textContent = (output>0 && hours>0) ? fmt1(output/hours) : "-";
+}
+
+function saveRecord(){
+  const date = $("fDate").value;
+  const output = parseFloat($("fOutput").value)||0;
+  const hours = parseFloat($("fHours").value)||0;
+  const head = parseFloat($("fHead").value)||0;
+  const { vals, avg } = getUphs();
+  const msg = $("saveMsg");
+  if(!date){ msg.textContent="请选择日期"; msg.className="err"; return; }
+  if(output<=0){ msg.textContent="请填写总产出"; msg.className="err"; return; }
+  const rec = {
+    id: editingId || Date.now(),
+    date,
+    totalOutput: output, totalHours: hours, totalHead: head,
+    uphA: vals[0], uphB: vals[1], uphC: vals[2], uphD: vals[3],
+    avgUph: avg,
+    upph: (hours>0) ? output/hours : 0,
+    personHours: hours*head,
+    updatedAt: new Date().toISOString()
+  };
+  const idx = db.findIndex(r=>r.date===date);
+  if(idx>=0){ db[idx]=rec; } else { db.push(rec); }
+  db.sort((a,b)=> a.date<b.date?-1:1);
+  if(!persist()){
+    msg.textContent = "⚠️ 保存到浏览器失败（存储被禁用或空间已满）"; msg.className = "err"; return;
+  }
+  msg.textContent = "✅ 已保存并同步看板：" + fmtDateCN(date) + " · 总产出 " + fmt0(output) + " 台";
+  msg.className = "";
+  editingId = null;
+  $("btnCancel").style.display = "none";
+  renderHist();
+  boardDate = date;                          // 看板日期跳到刚保存的日期
+  if(currentTab !== "board"){ switchTab("board"); }  // 自动切到看板直接显示
+  else { renderBoard(); }
+}
+
+function editRecord(id){
+  const r = db.find(x=>x.id===id);
+  if(!r) return;
+  loadForm(r.date);
+  $("saveMsg").textContent = "编辑中：" + fmtDateCN(r.date);
+  switchToInput();
+}
+function deleteRecord(id){
+  const r = db.find(x=>x.id===id);
+  if(!r) return;
+  if(!confirm("删除 " + r.date + " 的记录？")) return;
+  db = db.filter(x=>x.id!==id);
+  persist();
+  if(editingId===id){ editingId=null; $("btnCancel").style.display="none"; }
+  renderHist();
+  if(currentTab==="board") renderBoard();
+}
+
+function renderHist(){
+  const wrap = $("histWrap");
+  if(!db.length){ wrap.innerHTML = '<div class="empty-tip">暂无记录，录入第一条数据吧</div>'; return; }
+  const rows = db.slice().reverse().map(r=>`
+    <tr>
+      <td class="mono"><b>${r.date}</b></td>
+      <td class="num"><b>${fmt0(r.totalOutput)}</b></td>
+      <td class="num">${fmt1(r.totalHours)}</td>
+      <td class="num">${r.totalHead||"-"}</td>
+      <td class="num">${fmt1(r.uphA)}</td>
+      <td class="num">${fmt1(r.uphB)}</td>
+      <td class="num">${fmt1(r.uphC)}</td>
+      <td class="num">${fmt1(r.uphD)}</td>
+      <td class="num">${fmt1(r.avgUph)}</td>
+      <td class="num">${fmt1(r.upph)}</td>
+      <td><button class="btn btn-sm" onclick="editRecord(${r.id})">编辑</button>
+          <button class="btn btn-sm btn-danger" onclick="deleteRecord(${r.id})">删</button></td>
+    </tr>`).join("");
+  wrap.innerHTML = `<table><thead><tr>
+    <th>日期</th><th>总产出</th><th>总工时h</th><th>总人数</th>
+    <th>A-UPH</th><th>B-UPH</th><th>C-UPH</th><th>D-UPH</th><th>平均UPH</th><th>UPPH</th><th>操作</th>
+  </tr></thead><tbody>${rows}</tbody></table>`;
+}
+
+/* ── 看板页 ── */
+let boardDate = todayStr(-1);
+let charts = {};
+function destroyCharts(){ Object.values(charts).forEach(c=>{ try{c.destroy();}catch(e){} }); charts={}; }
+function moveDate(delta){
+  const d = dateFromISO(boardDate); d.setDate(d.getDate()+delta);
+  boardDate = toISO(d); renderBoard();
+}
+function setDateToday(){ boardDate = todayStr(0); renderBoard(); }
+function recOf(date){ return db.find(r=>r.date===date); }
+
+function renderBoard(){
+  destroyCharts();
+  $("boardDate").innerHTML = fmtDateCN(boardDate) + '<span class="w">' + boardDate + '</span>';
+  const rec = recOf(boardDate);
+  const has = !!rec;
+
+  /* KPI */
+  $("kpiOut").innerHTML = (rec?fmt0(rec.totalOutput):"-") + "<small>台</small>";
+  $("kpiHours").innerHTML = (rec?fmt1(rec.totalHours):"-") + "<small>h</small>";
+  $("kpiUph").innerHTML = (rec?fmt1(rec.avgUph):"-") + "<small>台/时</small>";
+  $("kpiUpph").textContent = (rec && rec.totalHours>0) ? fmt1(rec.upph) : "-";
+  const BASE_UPPH = 1.2914;   // 基准 UPPH（用户给定）
+  const upEl = $("kpiUpphUp");
+  if(rec && rec.upph>0){
+    const pct = (rec.upph/BASE_UPPH - 1) * 100;
+    const sign = pct>=0 ? "+" : "";
+    upEl.textContent = sign + (Math.round(pct*10)/10) + "%";
+    upEl.className = "v upv " + (pct>=0 ? "up-g" : "up-b");
+  }else{
+    upEl.textContent = "-"; upEl.className = "v upv";
+  }
+
+  /* 当日明细表 */
+  const det = $("detailWrap");
+  if(!has){
+    det.innerHTML = '<div class="empty-tip">当天暂无记录，去「数据录入」保存一条吧</div>';
+  }else{
+    det.innerHTML = `<table><thead><tr>
+      <th>日期</th><th>总产出(台)</th><th>总工时(h)</th><th>总人数</th><th>总人时(h)</th>
+      <th>A-UPH</th><th>B-UPH</th><th>C-UPH</th><th>D-UPH</th><th>平均UPH</th><th>总UPPH</th>
+    </tr></thead><tbody>
+      <tr>
+        <td class="mono">${rec.date}</td>
+        <td class="num"><b>${fmt0(rec.totalOutput)}</b></td>
+        <td class="num">${fmt1(rec.totalHours)}</td>
+        <td class="num">${rec.totalHead||"-"}</td>
+        <td class="num">${fmt1(rec.personHours)}</td>
+        <td class="num">${fmt1(rec.uphA)}</td>
+        <td class="num">${fmt1(rec.uphB)}</td>
+        <td class="num">${fmt1(rec.uphC)}</td>
+        <td class="num">${fmt1(rec.uphD)}</td>
+        <td class="num">${fmt1(rec.avgUph)}</td>
+        <td class="num"><b>${fmt1(rec.upph)}</b></td>
+      </tr>
+    </tbody></table>`;
+  }
+
+  /* 图表: 最近7天（周六日默认不显示） */
+  const days = [];
+  const d0 = dateFromISO(boardDate);
+  for(let i=6;i>=0;i--){ const d=new Date(d0); d.setDate(d.getDate()-i); days.push(toISO(d)); }
+  for(let i=days.length-1;i>=0;i--){ const wd=dateFromISO(days[i]).getDay(); if(wd===0||wd===6) days.splice(i,1); }
+  const rs = days.map(ds=>recOf(ds));
+  const dayA = rs.map(r=>r?r.uphA||null:null);
+  const dayB = rs.map(r=>r?r.uphB||null:null);
+  const dayC = rs.map(r=>r?r.uphC||null:null);
+  const dayD = rs.map(r=>r?r.uphD||null:null);
+  const dayUpph = rs.map(r=>r?r.upph:null);
+  const dayOut = rs.map(r=>r?r.totalOutput:0);
+  const labels = days.map(ds=>(dateFromISO(ds).getMonth()+1)+"/"+dateFromISO(ds).getDate());
+  if(typeof Chart === "undefined"){
+    document.querySelectorAll(".chart-card").forEach(c=>{
+      c.innerHTML = '<h4>图表</h4><div style="color:var(--muted);font-size:12px;padding:30px 10px;text-align:center;">图表库加载失败（需联网）<br>数据表格不受影响</div>';
+    });
+    return;
+  }
+  const gridC = { color:"#eef1f4" };
+  const tip = { backgroundColor:"#0f172a", titleFont:{family:"Noto Sans SC"}, bodyFont:{family:"JetBrains Mono"} };
+  if(typeof ChartDataLabels !== "undefined"){ Chart.register(ChartDataLabels); }
+  const dl = {  // 数据标签：合适大小，空心值不显示
+    color:"#475569", font:{size:10, weight:"600"},
+    anchor:"end", align:"top", offset:2,
+    formatter: v => (v==null||v===0) ? "" : Number(v).toLocaleString("en-US"),
+    display:"auto"
+  };
+  const lineChart = (cid, label, data) => {
+    const li = lastIdx(data);
+    return new Chart($(cid), { type:"line",
+      data:{ labels, datasets:[{ label, data,
+        borderColor:INK, backgroundColor:"rgba(31,41,55,.05)", fill:true, tension:.35, spanGaps:true,
+        pointRadius: data.map((v,i)=> v==null ? 0 : (i===li ? 4.5 : 2.5)),
+        pointBackgroundColor: data.map((v,i)=> i===li ? ACC : INK),
+        pointBorderColor: data.map((v,i)=> i===li ? "#ffffff" : INK),
+        pointBorderWidth: data.map((v,i)=> i===li ? 1.5 : 1)
+      },{ label:label+" 趋势", data:linReg(data), borderColor:"rgba(79,70,229,.4)", borderWidth:1.5, borderDash:[5,4], fill:false, pointRadius:0, datalabels:{display:false} }] },
+      options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false}, tooltip:tip, datalabels:dl },
+        scales:{ y:{ beginAtZero:true, max:topMax(data), grid:gridC, ticks:{ font:{size:9}, color:"#94a3b8" } }, x:{ grid:{display:false}, ticks:{ font:{size:9}, color:"#94a3b8" } } } } });
+  };
+  charts.uphA = lineChart("chUphA", "A线 UPH", dayA);
+  charts.uphB = lineChart("chUphB", "B线 UPH", dayB);
+  charts.uphC = lineChart("chUphC", "C线 UPH", dayC);
+  charts.uphD = lineChart("chUphD", "D线 UPH", dayD);
+  charts.upph = lineChart("chUpph", "总 UPPH", dayUpph);
+  charts.plan = new Chart($("chPlan"), { type:"bar",
+    data:{ labels, datasets:[{ label:"总产出", data:dayOut,
+      backgroundColor: dayOut.map((v,i)=> i===dayOut.length-1 ? ACC : BAR),
+      borderColor: dayOut.map((v,i)=> i===dayOut.length-1 ? ACC : BARB), borderWidth:1, borderRadius:4 },
+      { type:"line", label:"总产出 趋势", data:linReg(dayOut), borderColor:"rgba(79,70,229,.4)", borderWidth:1.5, borderDash:[5,4], fill:false, pointRadius:0, datalabels:{display:false} }]},
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false}, tooltip:tip, datalabels:{ color:"#475569", font:{size:10, weight:"600"}, anchor:"end", align:"top", offset:2, formatter:v => (v==null||v===0) ? "" : Number(v).toLocaleString("en-US"), display:"auto" } },
+      scales:{ y:{ beginAtZero:true, max:topMax(dayOut), grid:gridC, ticks:{ font:{size:9}, color:"#94a3b8" } }, x:{ grid:{display:false}, ticks:{ font:{size:9}, color:"#94a3b8" } } } } });
+  renderAttendance();
+}
+
+/* ── 出勤数据（attendance-data.js 提供，每日中午由脚本自动更新） ── */
+function renderAttendance(){
+  const wrap = $("attWrap");
+  const upd = $("attUpdated");
+  const A = window.ATTENDANCE_DATA;
+  if(!A || !A.days || !Object.keys(A.days).length){
+    upd.textContent = "";
+    wrap.innerHTML = '<div style="color:var(--muted);font-size:12px;padding:18px;text-align:center;">暂无出勤数据 — 每日中午自动从「出勤数据」文件夹的出勤表提取<br>（需 attendance-data.js 已生成，打开页面时自动加载）</div>';
+    return;
+  }
+  upd.textContent = A.updatedAt ? "更新于 " + A.updatedAt : "";
+  // 有效日：排除周六日 + 排除错误数据日（出勤人数<1000，视为未填完整）
+  const dArr = Object.keys(A.days).sort().filter(ds=>{
+    const wd=dateFromISO(ds).getDay(); if(wd===0||wd===6) return false;
+    if((A.days[ds].totalChu||0) < 1000) return false;
+    return true;
+  });
+  const dArrT = dArr.filter(ds => ds <= boardDate);   // 趋势图只显示到主日期为止（与看板同步）
+  // 展示日 = 主看板日期（与看板同步）；主日期无数据或为错误数据日时回退最近有效完整日期
+  let last = boardDate;
+  if(!A.days[last] || (A.days[last].totalChu||0) < 1000){
+    last = dArrT[dArrT.length-1];
+    for(let i=dArrT.length-1;i>=0;i--){ if((A.days[dArrT[i]].totalZai||0) >= 800){ last = dArrT[i]; break; } }
+  }
+  const latest = A.days[last];
+  // KPI 行：在编总数 / 出勤人数 / 出勤率
+  const rateStr = latest.rate!=null ? Number(latest.rate).toFixed(1)+"%" : "-";
+  const rk = latest.rate!=null ? (latest.rate>=95 ? "ok" : (latest.rate>=90 ? "warn-c" : "bad")) : "";
+  const kpiHTML = `<div class="att-kpis">
+    <div class="kpi"><div class="k">在编总数</div><div class="v">${latest.totalZai!=null?fmt0(latest.totalZai):"-"}</div></div>
+    <div class="kpi"><div class="k">出勤人数</div><div class="v">${latest.totalChu!=null?fmt0(latest.totalChu):"-"}</div></div>
+    <div class="kpi"><div class="k">出勤率</div><div class="v ${rk}">${rateStr}</div></div>
+  </div>`;
+  // 图表：显示到主日期为止的历史（与看板同步）
+  const labels = dArrT.map(ds=>{ const [y,m,dd]=ds.split("-").map(Number); return m+"/"+dd; });
+  const zai = dArrT.map(ds=>A.days[ds].totalZai!=null?A.days[ds].totalZai:null);
+  const chu = dArrT.map(ds=>A.days[ds].totalChu!=null?A.days[ds].totalChu:null);
+  const rate = dArrT.map(ds=>A.days[ds].rate!=null?A.days[ds].rate:null);
+  // 部门明细图（AC-AE 汇总列，最新日期）：在编(人数降序) / 出勤率(好→差) / 加班费(金额降序)
+  const depts = (latest.depts||[]).filter(d=>d.zai>0);
+  const deptsByZai = depts.slice().sort((a,b)=>b.zai-a.zai);
+  const deptsByRate = depts.slice().filter(d=>d.rate!=null).sort((a,b)=>b.rate-a.rate).concat(depts.filter(d=>d.rate==null));
+  // 加班费：录入模块（localStorage production_ot_cost_v1），后续将自动取数
+  const otRaw = (function(){ try{ return JSON.parse(localStorage.getItem(OT_KEY)||"{}"); }catch(e){ return {}; } })();
+  const otDay = otRaw[last]||{};
+  const otArr = Object.keys(otDay).map(dept=>({dept, ot:Number(otDay[dept])||0})).filter(x=>x.ot>0).sort((a,b)=>b.ot-a.ot);
+  let chartHTML = `<div class="charts att-charts" style="grid-template-rows:repeat(1,1fr);margin-top:10px;margin-bottom:0;">
+    <div class="chart-card"><h4>在编总数趋势</h4><div class="cv"><canvas id="chAttZai"></canvas></div></div>
+    <div class="chart-card"><h4>出勤人数趋势</h4><div class="cv"><canvas id="chAttChu"></canvas></div></div>
+    <div class="chart-card"><h4>出勤率趋势</h4><div class="cv"><canvas id="chAttRate"></canvas></div></div>`;
+  // 趋势+部门 6 图合并在一个 2 列网格：出勤率趋势右边紧贴「各部门出勤率」，无空位
+  let deptHTML = "";
+  if(depts.length){
+    const dh = 150;   // 四图统一高度（用户要求缩窄）
+    const otCard = otArr.length
+      ? `<div class="chart-card"><h4>各部门加班费</h4><div class="cv" style="height:${dh}px;"><canvas id="chDeptOT"></canvas></div></div>`
+      : `<div class="chart-card"><h4>各部门加班费</h4><div style="height:${dh}px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:12px;text-align:center;padding:0 10px;">暂无录入 — 到「录入」页加班费模块添加</div></div>`;
+    deptHTML = `
+      <div class="chart-card"><h4>各部门出勤率</h4><div class="cv" style="height:${dh}px;"><canvas id="chDeptRate"></canvas></div></div>
+      <div class="chart-card"><h4>各部门在编人数</h4><div class="cv" style="height:${dh}px;"><canvas id="chDeptZai"></canvas></div></div>
+      ${otCard}`;
+  }
+  chartHTML += deptHTML + `</div>`;
+  wrap.innerHTML = kpiHTML + chartHTML;
+  if(typeof Chart === "undefined") return;
+  if(typeof ChartDataLabels !== "undefined"){ Chart.register(ChartDataLabels); }
+  const dlA = { color:"#475569", font:{size:9, weight:"600"}, anchor:"end", align:"top", offset:2,
+    formatter: v => (v==null) ? "" : Number(v).toLocaleString("en-US"), display:"auto" };
+  const tipA = { backgroundColor:"#0f172a", titleFont:{family:"Noto Sans SC"}, bodyFont:{family:"JetBrains Mono"} };
+  const gridA = { color:"#eef1f4" };
+  charts.attZai = new Chart($("chAttZai"), { type:"line",
+    data:{ labels, datasets:[{ label:"在编总数", data:zai, borderColor:INK, backgroundColor:"rgba(31,41,55,.05)", fill:true, tension:.35, spanGaps:true, pointRadius:zai.map((v,i)=> v==null?0:(i===lastIdx(zai)?4.5:2.5)), pointBackgroundColor:zai.map((v,i)=> i===lastIdx(zai)?ACC:INK), pointBorderColor:zai.map((v,i)=> i===lastIdx(zai)?"#ffffff":INK), pointBorderWidth:zai.map((v,i)=> i===lastIdx(zai)?1.5:1) },{ label:"在编总数 趋势", data:linReg(zai), borderColor:"rgba(79,70,229,.4)", borderWidth:1.5, borderDash:[5,4], fill:false, pointRadius:0, datalabels:{display:false} }] },
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false}, tooltip:tipA, datalabels:dlA },
+      scales:{ y:{ beginAtZero:true, max:topMax(zai), grid:gridA, ticks:{ font:{size:9}, color:"#94a3b8" } }, x:{ grid:{display:false}, ticks:{ font:{size:9}, color:"#94a3b8" } } } } });
+  charts.attChu = new Chart($("chAttChu"), { type:"line",
+    data:{ labels, datasets:[{ label:"出勤人数", data:chu, borderColor:INK, backgroundColor:"rgba(31,41,55,.05)", fill:true, tension:.35, spanGaps:true, pointRadius:chu.map((v,i)=> v==null?0:(i===lastIdx(chu)?4.5:2.5)), pointBackgroundColor:chu.map((v,i)=> i===lastIdx(chu)?ACC:INK), pointBorderColor:chu.map((v,i)=> i===lastIdx(chu)?"#ffffff":INK), pointBorderWidth:chu.map((v,i)=> i===lastIdx(chu)?1.5:1) },{ label:"出勤人数 趋势", data:linReg(chu), borderColor:"rgba(79,70,229,.4)", borderWidth:1.5, borderDash:[5,4], fill:false, pointRadius:0, datalabels:{display:false} }] },
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false}, tooltip:tipA, datalabels:dlA },
+      scales:{ y:{ beginAtZero:true, max:topMax(chu), grid:gridA, ticks:{ font:{size:9}, color:"#94a3b8" } }, x:{ grid:{display:false}, ticks:{ font:{size:9}, color:"#94a3b8" } } } } });
+  charts.attRate = new Chart($("chAttRate"), { type:"line",
+    data:{ labels, datasets:[{ label:"出勤率", data:rate, borderColor:INK, backgroundColor:"rgba(31,41,55,.05)", fill:true, tension:.35, spanGaps:true, pointRadius:rate.map((v,i)=> v==null?0:(i===lastIdx(rate)?4.5:2.5)), pointBackgroundColor:rate.map((v,i)=> i===lastIdx(rate)?ACC:INK), pointBorderColor:rate.map((v,i)=> i===lastIdx(rate)?"#ffffff":INK), pointBorderWidth:rate.map((v,i)=> i===lastIdx(rate)?1.5:1) },{ label:"出勤率 趋势", data:linReg(rate), borderColor:"rgba(79,70,229,.4)", borderWidth:1.5, borderDash:[5,4], fill:false, pointRadius:0, datalabels:{display:false} }] },
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false}, tooltip:tipA, datalabels:dlA },
+      scales:{ y:{ min:70, max:110, stepSize:10, grid:gridA, ticks:{ font:{size:9}, callback:v=>v+"%" } }, x:{ grid:{display:false}, ticks:{ font:{size:9}, color:"#94a3b8" } } } } });
+  // 部门竖向柱状图（≥98 绿 / 95~98 黄 / <95 红）
+  if(depts.length){
+    const fmtInt = v => (v==null) ? "" : Number(v).toLocaleString("en-US");
+    const dlBarV = { color:"#475569", font:{size:9, weight:"600"}, anchor:"end", align:"top", offset:2,
+      formatter: v => (v==null||v===0) ? "" : fmtInt(v) };
+    // 在编人数（人数降序）
+    const zLabels = deptsByZai.map(d=>d.dept), zData = deptsByZai.map(d=>d.zai);
+    charts.attDeptZai = new Chart($("chDeptZai"), { type:"bar",
+      data:{ labels:zLabels, datasets:[{ label:"在编人数", data:zData, backgroundColor:zData.map(v=> v>=Math.max(...zData) ? ACC : BAR), borderColor:zData.map(v=> v>=Math.max(...zData) ? ACC : BARB), borderWidth:1, borderRadius:3 }] },
+      options:{ responsive:true, maintainAspectRatio:false,
+        plugins:{ legend:{display:false}, tooltip:tipA, datalabels:dlBarV },
+        scales:{ y:{ beginAtZero:true, max:topMax(zData), grid:gridA, ticks:{ font:{size:9}, color:"#94a3b8" } }, x:{ grid:{display:false}, ticks:{ font:{size:9}, maxRotation:60, minRotation:0 } } } } });
+    // 出勤率（好→差排序，≥98 绿 / ≥95 黄 / <95 红）
+    const rLabels = deptsByRate.map(d=>d.dept), rData = deptsByRate.map(d=>d.rate!=null?d.rate:null);
+    // 灰阶递进：出勤率好→差 = 浅灰→深灰（rate==null 的部门用统一浅灰）
+    const grayScale = n => { const F=[244,244,245], T=[113,113,122]; if(n<1) return []; if(n===1) return ["#a1a1aa"]; return Array.from({length:n},(_,i)=>{ const t=i/(n-1); return "rgb("+F.map((v,j)=>Math.round(v+(T[j]-v)*t)).join(",")+")"; }); };
+    const gs = grayScale(deptsByRate.filter(d=>d.rate!=null).length);
+    let gi = 0;
+    const rColors  = deptsByRate.map(d=> d.rate==null ? BAR : gs[gi++]);
+    const rBorders = rColors;
+    const rLabelC  = "#52525b";
+    charts.attDeptRate = new Chart($("chDeptRate"), { type:"bar",
+      data:{ labels:rLabels, datasets:[{ label:"出勤率", data:rData, backgroundColor:rColors, borderColor:rBorders, borderWidth:1, borderRadius:3 }] },
+      options:{ responsive:true, maintainAspectRatio:false,
+        plugins:{ legend:{display:false}, tooltip:tipA,
+          datalabels:{ color:rLabelC, font:{size:9, weight:"600"}, anchor:"end", align:"top", offset:2,
+            formatter: v => (v==null) ? "" : v.toFixed(1)+"%" } },
+        scales:{ y:{ min:0, max:110, stepSize:10, grid:gridA, ticks:{ font:{size:9}, callback:v=>v+"%" } }, x:{ grid:{display:false}, ticks:{ font:{size:9}, maxRotation:60, minRotation:0 } } } } });
+    // 各部门加班费（金额降序，琥珀金）
+    if(otArr.length){
+      const oLabels = otArr.map(d=>d.dept), oData = otArr.map(d=>d.ot);
+      charts.attDeptOT = new Chart($("chDeptOT"), { type:"bar",
+        data:{ labels:oLabels, datasets:[{ label:"加班费(฿)", data:oData, backgroundColor:"#fde68a", borderColor:"#fcd34d", borderWidth:1, borderRadius:3 }] },
+        options:{ responsive:true, maintainAspectRatio:false,
+          plugins:{ legend:{display:false}, tooltip:tipA,
+            datalabels:{ color:"#b45309", font:{size:9, weight:"600"}, anchor:"end", align:"top", offset:2,
+              formatter: v => (v==null||v===0) ? "" : "฿"+Number(v).toLocaleString("en-US"), display:"auto" } },
+          scales:{ y:{ beginAtZero:true, max:topMax(oData), grid:gridA, ticks:{ font:{size:9}, color:"#94a3b8" } }, x:{ grid:{display:false}, ticks:{ font:{size:9}, maxRotation:60, minRotation:0 } } } } });
+    }
+  }
+}
+
+/* ── 加班费录入模块 ── */
+const OT_KEY = "production_ot_cost_v1";
+function loadOT(){ try{ return JSON.parse(localStorage.getItem(OT_KEY)||"{}"); }catch(e){ return {}; } }
+function saveOT(d){ try{ localStorage.setItem(OT_KEY, JSON.stringify(d)); return true; }catch(e){ alert("加班费保存失败：" + (e.message||e)); return false; } }
+function otDeptList(){
+  const set = [];
+  try{
+    const A = window.ATTENDANCE_DATA || {days:{}};
+    Object.keys(A.days).sort().forEach(k=>{ (A.days[k].depts||[]).forEach(d=>{ if(d.dept && set.indexOf(d.dept)===-1) set.push(d.dept); }); });
+  }catch(e){}
+  if(!set.length) set.push("Pro.1","Pro.2","Pro.3","Pro.4","QC","QA","IP&ED","Molding","Stamping","Assembly","Purchasing","Warehouse","Maintenance","Engineering","HR");
+  return set;
+}
+function initOt(){
+  const sel = $("otDept"); if(!sel) return;
+  otDeptList().forEach(d=>{ const o=document.createElement("option"); o.value=d; o.textContent=d; sel.appendChild(o); });
+  $("otDate").value = todayStr(-1);   // 默认昨天（与出勤口径一致）
+  renderOtList();
+}
+function addOtCost(){
+  const date = $("otDate").value, dept = $("otDept").value, amt = parseFloat($("otAmount").value);
+  if(!date){ alert("请选择日期"); return; }
+  if(!dept){ alert("请选择部门"); return; }
+  if(!(amt>=0)){ alert("请输入加班费金额"); return; }
+  const d = loadOT();
+  if(!d[date]) d[date] = {};
+  d[date][dept] = Math.round(amt*100)/100;
+  saveOT(d);
+  $("otAmount").value = "";
+  renderOtList();
+}
+function delOtCost(dept){
+  const date = $("otDate").value;
+  const d = loadOT();
+  if(d[date]){ delete d[date][dept]; if(!Object.keys(d[date]).length) delete d[date]; saveOT(d); }
+  renderOtList();
+}
+function renderOtList(){
+  const date = $("otDate").value;
+  const d = loadOT();
+  const day = d[date]||{};
+  const keys = Object.keys(day);
+  const box = $("otList"); if(!box) return;
+  if(!keys.length){ box.innerHTML = '<div style="color:var(--muted);font-size:12px;padding:8px 2px;">当天还没有加班费记录 — 选部门+金额后点「＋ 添加」</div>'; return; }
+  let h = '<table style="max-width:540px;"><thead><tr><th>部门</th><th>加班费 (฿)</th><th style="width:64px;"></th></tr></thead><tbody>';
+  keys.sort().forEach(k=>{
+    h += '<tr><td class="num">' + k + '</td><td class="num">฿ ' + Number(day[k]).toLocaleString("en-US") + '</td><td><button class="btn btn-danger btn-sm" onclick="delOtCost(\'' + k.replace(/'/g,"\\'") + '\')">删除</button></td></tr>';
+  });
+  box.innerHTML = h + '</tbody></table>';
+}
+
+/* ── 导出 CSV ── */
+function exportImage(){
+  if(typeof html2canvas === "undefined"){ alert("导出组件未加载，请联网后刷新页面"); return; }
+  const board = document.getElementById("page-board");
+  if(!board.classList.contains("active")) switchTab("board");
+  const d = document.getElementById("boardDate").textContent.replace(/\s+/g," ").trim();
+  // 先滚回顶部，再按完整文档尺寸截图（html2canvas 视口=整页，避免下方空白）
+  window.scrollTo(0,0);
+  const docEl = document.documentElement;
+  const W = Math.max(docEl.scrollWidth, document.body.scrollWidth, board.scrollWidth);
+  const H = Math.max(docEl.scrollHeight, document.body.scrollHeight);
+  html2canvas(document.body, {
+    scale:2, useCORS:true, backgroundColor:"#f5f5f6", logging:false,
+    windowWidth: W, windowHeight: H,   // 关键：渲染视口=完整文档，整页全部绘制不残留空白
+    scrollX:0, scrollY:0,
+    onclone: function(cd){
+      // 解除所有固定高度/溢出裁剪，让长图完整渲染从上到下
+      const set = el => { if(el){ el.style.height="auto"; el.style.minHeight="0"; el.style.maxHeight="none"; el.style.overflow="visible"; } };
+      set(cd.documentElement); set(cd.body);
+      set(cd.querySelector("main"));
+      set(cd.querySelector(".board-wrap"));
+      set(cd.querySelector(".input-wrap"));
+      set(cd.getElementById("page-board"));
+      set(cd.getElementById("page-input"));
+      const hb = cd.querySelector(".hist-box"); if(hb){ hb.style.maxHeight="none"; hb.style.overflow="visible"; }
+      cd.querySelectorAll(".chart-card").forEach(c=>{ c.style.overflow="visible"; });
+    }
+  }).then(function(canvas){
+    const a = document.createElement("a");
+    a.download = "生产人工效率看板_" + (d.replace(/[\\/:]/g,"-") || new Date().toISOString().slice(0,10)) + ".png";
+    a.href = canvas.toDataURL("image/png");
+    document.body.appendChild(a); a.click(); a.remove();
+  }).catch(function(e){ console.error(e); alert("导出失败：" + (e.message||e)); });
+}
+function exportCSV(){
+  if(!db.length){ alert("暂无数据可导出"); return; }
+  const esc = s => '"' + String(s==null?"":s).replace(/"/g,'""') + '"';
+  const head = ["日期","总产出","总工时h","总人数","总人时","A-UPH","B-UPH","C-UPH","D-UPH","平均UPH","总UPPH"];
+  const rows = db.slice().sort((a,b)=>a.date<b.date?-1:1).map(r=>[
+    r.date, r.totalOutput, r.totalHours, r.totalHead, Math.round(r.personHours*100)/100,
+    r.uphA, r.uphB, r.uphC, r.uphD, Math.round(r.avgUph*10)/10, Math.round(r.upph*10)/10
+  ].map(esc).join(","));
+  const csv = "\uFEFF" + [head.map(esc).join(","), ...rows].join("\r\n");
+  const blob = new Blob([csv], {type:"text/csv;charset=utf-8"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "生产人工效率看板数据_" + todayStr(0) + ".csv";
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+/* ── 时钟 ── */
+function tick(){
+  const d = new Date();
+  $("clock").textContent = d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")+" "+String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0")+":"+String(d.getSeconds()).padStart(2,"0");
+}
+setInterval(tick,1000);
+
+/* ── 初始化 ── */
+document.addEventListener("DOMContentLoaded", ()=>{ initForm(); tick(); renderBoard(); });
+</script>
+</body>
+</html>
