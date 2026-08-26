@@ -1150,27 +1150,27 @@ window.ATTENDANCE_DATA = {
     },
     {
      "dept": "Pro.3",
-     "zai": 0.0,
-     "chu": 0.0,
-     "rate": null
+     "zai": 85.0,
+     "chu": 80.0,
+     "rate": 94.1
     },
     {
      "dept": "Pro.4",
-     "zai": 0.0,
-     "chu": 0.0,
-     "rate": null
+     "zai": 165.0,
+     "chu": 157.0,
+     "rate": 95.2
     },
     {
      "dept": "Pro.5",
-     "zai": 0.0,
-     "chu": 0.0,
-     "rate": null
+     "zai": 27.0,
+     "chu": 26.0,
+     "rate": 96.3
     },
     {
      "dept": "Pro.6",
-     "zai": 0.0,
-     "chu": 0.0,
-     "rate": null
+     "zai": 30.0,
+     "chu": 30.0,
+     "rate": 100.0
     },
     {
      "dept": "PE",
@@ -1233,10 +1233,10 @@ window.ATTENDANCE_DATA = {
      "rate": null
     }
    ],
-   "totalZai": 701.0,
-   "totalChu": 679.0,
-   "rate": 96.9
+   "totalZai": 1008.0,
+   "totalChu": 972.0,
+   "rate": 96.4
   }
  },
- "updatedAt": "2026-08-25 15:21"
+ "updatedAt": "2026-08-26 08:55"
 };
