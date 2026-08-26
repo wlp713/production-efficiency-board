@@ -1,2 +1,2 @@
 // 由 uph_extract.py 自动生成（cron 每天16:50 工作日）
-window.AUTO_UPH = {"date": "2026-08-26", "workedHours": 5.92, "updatedAt": "2026-08-26 15:10:01", "source": "PDT3 data.json", "uphA": 398.2, "actualA": 2356.0, "targetA": 3300.0, "uphB": 390.2, "actualB": 2309.0, "targetB": 3600.0, "uphC": 423.2, "actualC": 2504.0, "targetC": 3400.0, "uphD": 165.8, "actualD": 981.0, "targetD": 1600.0, "totalActual": 8150.0};
+window.AUTO_UPH = {"date": "2026-08-26", "workedHours": 7.5, "updatedAt": "2026-08-26 16:50:03", "source": "PDT3 data.json", "uphA": 393.1, "actualA": 2949.0, "targetA": 3300.0, "uphB": 375.4, "actualB": 2816.0, "targetB": 3600.0, "uphC": 413.8, "actualC": 3104.0, "targetC": 3400.0, "uphD": 170.5, "actualD": 1279.0, "targetD": 1600.0, "totalActual": 10148.0};
