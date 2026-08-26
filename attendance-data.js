@@ -95,13 +95,13 @@ window.ATTENDANCE_DATA = {
     },
     {
      "dept": "HR",
-     "zai": 0.0,
-     "chu": 0.0,
-     "rate": null
+     "zai": 11.0,
+     "chu": 11.0,
+     "rate": 100.0
     }
    ],
-   "totalZai": 1112.0,
-   "totalChu": 1094.0,
+   "totalZai": 1123.0,
+   "totalChu": 1105.0,
    "rate": 98.4
   },
   "2026-08-03": {
@@ -1192,9 +1192,9 @@ window.ATTENDANCE_DATA = {
     },
     {
      "dept": "PC",
-     "zai": 0.0,
-     "chu": 0.0,
-     "rate": null
+     "zai": 47.0,
+     "chu": 47.0,
+     "rate": 100.0
     },
     {
      "dept": "QA",
@@ -1228,14 +1228,14 @@ window.ATTENDANCE_DATA = {
     },
     {
      "dept": "HR",
-     "zai": 0.0,
-     "chu": 0.0,
-     "rate": null
+     "zai": 11.0,
+     "chu": 11.0,
+     "rate": 100.0
     }
    ],
-   "totalZai": 1064.0,
-   "totalChu": 1026.0,
-   "rate": 96.4
+   "totalZai": 1122.0,
+   "totalChu": 1084.0,
+   "rate": 96.6
   },
   "2026-08-26": {
    "depts": [
@@ -1341,5 +1341,5 @@ window.ATTENDANCE_DATA = {
    "rate": 96.6
   }
  },
- "updatedAt": "2026-08-26 12:02"
+ "updatedAt": "2026-08-26 13:08"
 };
