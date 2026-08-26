@@ -187,6 +187,9 @@
     <span class="en">Production / Labor Efficiency Board</span>
   </div>
   <div class="spacer"></div>
+  <button class="btn" onclick="exportData()" title="把录入的数据下载为 JSON 文件（用于备份/迁移到其他设备或网址）">导出数据</button>
+  <button class="btn" onclick="document.getElementById('importFile').click()" title="从 JSON 文件恢复数据（含本地/GitHub 网页之间迁移）">导入数据</button>
+  <input type="file" id="importFile" accept=".json,application/json" style="display:none" onchange="importData(this)">
   <button class="btn" onclick="exportImage()">导出长图</button>
   <div class="clock" id="clock"></div>
 </header>
@@ -804,6 +807,49 @@ function renderAttendance(){
           scales:{ y:{ beginAtZero:true, max:topMax(oData), grid:gridA, ticks:{ font:{size:9}, color:"#94a3b8" } }, x:{ grid:{display:false}, ticks:{ font:{size:9}, maxRotation:60, minRotation:0 } } } } });
     }
   }
+}
+
+/* ── 数据备份：导出 / 导入（本地版 ↔ GitHub 版迁移、日常备份通用） ── */
+function exportData(){
+  const payload = {
+    app: "production-efficiency-board",
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    db: db || [],
+    otCost: loadOT() || {}
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "效率看板数据_" + todayStr(0) + ".json";
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 800);
+}
+function importData(input){
+  const file = input && input.files && input.files[0];
+  input.value = "";
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(){
+    try{
+      const data = JSON.parse(reader.result);
+      if(!data || data.app !== "production-efficiency-board") throw new Error("不是本看板导出的数据文件");
+      if(!Array.isArray(data.db)) throw new Error("数据里没有日明细记录");
+      try{ localStorage.setItem(STORE_KEY + "_backup", localStorage.getItem(STORE_KEY) || "[]"); }catch(e){}
+      try{ localStorage.setItem(OT_KEY + "_backup", localStorage.getItem(OT_KEY) || "{}"); }catch(e){}
+      db = data.db;
+      db.forEach(r=>{ if(r && r.totalHours>0) r.upph = r.totalOutput/r.totalHours; });
+      db.forEach(r=>{ if(r){ const abc=[r.uphA,r.uphB,r.uphC].filter(v=>v>0); r.avgUph = abc.length ? abc.reduce((a,b)=>a+b,0)/abc.length : 0; } });
+      try{ localStorage.setItem(STORE_KEY, JSON.stringify(db)); }catch(e){ throw new Error("保存到浏览器失败：" + (e.message||e)); }
+      if(data.otCost && typeof data.otCost === "object"){ localStorage.setItem(OT_KEY, JSON.stringify(data.otCost)); }
+      alert("✅ 导入成功：" + db.length + " 条日明细记录" + (data.otCost && Object.keys(data.otCost).length ? " + 加班费数据" : "") + "\n（导入前数据已备份为 *_backup）页面即将刷新");
+      location.reload();
+    }catch(e){
+      alert("❌ 导入失败：" + (e.message || e));
+    }
+  };
+  reader.readAsText(file);
 }
 
 /* ── 加班费录入模块 ── */
