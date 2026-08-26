@@ -1174,21 +1174,21 @@ window.ATTENDANCE_DATA = {
     },
     {
      "dept": "PE",
-     "zai": 0.0,
-     "chu": 0.0,
-     "rate": null
+     "zai": 32.0,
+     "chu": 31.0,
+     "rate": 96.9
     },
     {
      "dept": "IP＆ED",
-     "zai": 0.0,
-     "chu": 0.0,
-     "rate": null
+     "zai": 19.0,
+     "chu": 18.0,
+     "rate": 94.7
     },
     {
      "dept": "MBS",
-     "zai": 0.0,
-     "chu": 0.0,
-     "rate": null
+     "zai": 5.0,
+     "chu": 5.0,
+     "rate": 100.0
     },
     {
      "dept": "PC",
@@ -1233,10 +1233,113 @@ window.ATTENDANCE_DATA = {
      "rate": null
     }
    ],
-   "totalZai": 1008.0,
-   "totalChu": 972.0,
+   "totalZai": 1064.0,
+   "totalChu": 1026.0,
    "rate": 96.4
+  },
+  "2026-08-26": {
+   "depts": [
+    {
+     "dept": "Pro.1",
+     "zai": 136.0,
+     "chu": 133.0,
+     "rate": 97.8
+    },
+    {
+     "dept": "Pro.2",
+     "zai": 0.0,
+     "chu": 0.0,
+     "rate": null
+    },
+    {
+     "dept": "Pro.3",
+     "zai": 85.0,
+     "chu": 81.0,
+     "rate": 95.3
+    },
+    {
+     "dept": "Pro.4",
+     "zai": 158.0,
+     "chu": 155.0,
+     "rate": 98.1
+    },
+    {
+     "dept": "Pro.5",
+     "zai": 27.0,
+     "chu": 26.0,
+     "rate": 96.3
+    },
+    {
+     "dept": "Pro.6",
+     "zai": 30.0,
+     "chu": 30.0,
+     "rate": 100.0
+    },
+    {
+     "dept": "PE",
+     "zai": 32.0,
+     "chu": 30.0,
+     "rate": 93.8
+    },
+    {
+     "dept": "IP＆ED",
+     "zai": 19.0,
+     "chu": 18.0,
+     "rate": 94.7
+    },
+    {
+     "dept": "MBS",
+     "zai": 5.0,
+     "chu": 5.0,
+     "rate": 100.0
+    },
+    {
+     "dept": "PC",
+     "zai": 0.0,
+     "chu": 0.0,
+     "rate": null
+    },
+    {
+     "dept": "QA",
+     "zai": 43.0,
+     "chu": 39.0,
+     "rate": 90.7
+    },
+    {
+     "dept": "SP Center",
+     "zai": 3.0,
+     "chu": 3.0,
+     "rate": 100.0
+    },
+    {
+     "dept": "Purchasing",
+     "zai": 21.0,
+     "chu": 21.0,
+     "rate": 100.0
+    },
+    {
+     "dept": "R＆D",
+     "zai": 18.0,
+     "chu": 16.0,
+     "rate": 88.9
+    },
+    {
+     "dept": "AC",
+     "zai": 13.0,
+     "chu": 13.0,
+     "rate": 100.0
+    },
+    {
+     "dept": "HR",
+     "zai": 0.0,
+     "chu": 0.0,
+     "rate": null
+    }
+   ],
+   "totalZai": 590.0,
+   "totalChu": 570.0,
+   "rate": 96.6
   }
  },
- "updatedAt": "2026-08-26 08:55"
+ "updatedAt": "2026-08-26 12:02"
 };
