@@ -325,6 +325,7 @@
 </main>
 
 <script src="attendance-data.js"></script>
+<script src="dept-hours-data.js"></script>
 <script src="auto-uph.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <script>
@@ -743,9 +744,24 @@ function renderAttendance(){
     const otCard = otArr.length
       ? `<div class="chart-card"><h4>各部门加班费</h4><div class="cv" style="height:${dh}px;"><canvas id="chDeptOT"></canvas></div></div>`
       : `<div class="chart-card"><h4>各部门加班费</h4><div style="height:${dh}px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:12px;text-align:center;padding:0 10px;">暂无录入 — 到「录入」页加班费模块添加</div></div>`;
+  // 部门工时 & OT 汇总（dept-hours-data.js 提供，聚合自出勤明细 CSV）
+  const DH = window.DEPT_HOURS_DATA || {days:{}};
+  const dhDay = DH.days[last] || null;
+  const dhArr = (dhDay && dhDay.depts) ? dhDay.depts.slice() : [];
+  const hoursArr = dhArr.slice().filter(x=>x.totalHours>0).sort((a,b)=>b.totalHours-a.totalHours);
+  const otHArr = dhArr.slice().filter(x=>x.otHours>0).sort((a,b)=>b.otHours-a.otHours);
+  const emptyCard = (title, tip) => `<div class="chart-card"><h4>${title}</h4><div style="height:${dh}px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:12px;text-align:center;padding:0 10px;">${tip}</div></div>`;
+  const hoursCard = hoursArr.length
+    ? `<div class="chart-card"><h4>各部门总工时</h4><div class="cv" style="height:${dh}px;"><canvas id="chDeptHours"></canvas></div></div>`
+    : emptyCard("各部门总工时", "暂无数据 — 待出勤明细 CSV 生成");
+  const otHoursCard = otHArr.length
+    ? `<div class="chart-card"><h4>各部门加班工时</h4><div class="cv" style="height:${dh}px;"><canvas id="chDeptOtHours"></canvas></div></div>`
+    : emptyCard("各部门加班工时", "暂无数据 — 待出勤明细 CSV 生成");
     deptHTML = `
       <div class="chart-card"><h4>各部门出勤率</h4><div class="cv" style="height:${dh}px;"><canvas id="chDeptRate"></canvas></div></div>
       <div class="chart-card"><h4>各部门在编人数</h4><div class="cv" style="height:${dh}px;"><canvas id="chDeptZai"></canvas></div></div>
+      ${hoursCard}
+      ${otHoursCard}
       ${otCard}`;
   }
   chartHTML += deptHTML + `</div>`;
@@ -796,6 +812,28 @@ function renderAttendance(){
           datalabels:{ color:rLabelC, font:{size:10, weight:"600"}, anchor:"end", align:"top", offset:2,
             formatter: v => (v==null) ? "" : v.toFixed(1)+"%" } },
         scales:{ y:{ min:0, max:110, stepSize:10, grid:gridA, ticks:{ font:{size:9}, callback:v=>v+"%" } }, x:{ grid:{display:false}, ticks:{ font:{size:9}, maxRotation:60, minRotation:0 } } } } });
+    // 各部门总工时（降序，靛蓝浅色）
+    if(hoursArr.length){
+      const hLabels = hoursArr.map(d=>d.dept), hData = hoursArr.map(d=>d.totalHours);
+      charts.deptHours = new Chart($("chDeptHours"), { type:"bar",
+        data:{ labels:hLabels, datasets:[{ label:"总工时(h)", data:hData, backgroundColor:"#c7d2fe", borderColor:"#a5b4fc", borderWidth:1, borderRadius:3 }] },
+        options:{ responsive:true, maintainAspectRatio:false,
+          plugins:{ legend:{display:false}, tooltip:tipA,
+            datalabels:{ color:"#3730a3", font:{size:10, weight:"600"}, anchor:"end", align:"top", offset:2,
+              formatter: v => (v==null||v===0) ? "" : Number(v).toLocaleString("en-US"), display:"auto" } },
+          scales:{ y:{ beginAtZero:true, max:topMax(hData), grid:gridA, ticks:{ font:{size:9}, color:"#94a3b8" } }, x:{ grid:{display:false}, ticks:{ font:{size:9}, maxRotation:60, minRotation:0 } } } } });
+    }
+    // 各部门加班工时（降序，橙色）
+    if(otHArr.length){
+      const oLabels = otHArr.map(d=>d.dept), oData = otHArr.map(d=>d.otHours);
+      charts.deptOtHours = new Chart($("chDeptOtHours"), { type:"bar",
+        data:{ labels:oLabels, datasets:[{ label:"加班工时(h)", data:oData, backgroundColor:"#fed7aa", borderColor:"#fdba74", borderWidth:1, borderRadius:3 }] },
+        options:{ responsive:true, maintainAspectRatio:false,
+          plugins:{ legend:{display:false}, tooltip:tipA,
+            datalabels:{ color:"#9a3412", font:{size:10, weight:"600"}, anchor:"end", align:"top", offset:2,
+              formatter: v => (v==null||v===0) ? "" : Number(v).toLocaleString("en-US"), display:"auto" } },
+          scales:{ y:{ beginAtZero:true, max:topMax(oData), grid:gridA, ticks:{ font:{size:9}, color:"#94a3b8" } }, x:{ grid:{display:false}, ticks:{ font:{size:9}, maxRotation:60, minRotation:0 } } } } });
+    }
     // 各部门加班费（金额降序，琥珀金）
     if(otArr.length){
       const oLabels = otArr.map(d=>d.dept), oData = otArr.map(d=>d.ot);
