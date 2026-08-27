@@ -745,17 +745,21 @@ function renderAttendance(){
       ? `<div class="chart-card"><h4>各部门加班费</h4><div class="cv" style="height:${dh}px;"><canvas id="chDeptOT"></canvas></div></div>`
       : `<div class="chart-card"><h4>各部门加班费</h4><div style="height:${dh}px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:12px;text-align:center;padding:0 10px;">暂无录入 — 到「录入」页加班费模块添加</div></div>`;
   // 部门工时 & OT 汇总（dept-hours-data.js 提供，聚合自出勤明细 CSV）
+  // 当天无工时数据时回退到最近有数据的日期，并在标题标注
   const DH = window.DEPT_HOURS_DATA || {days:{}};
-  const dhDay = DH.days[last] || null;
+  const dhDates = Object.keys(DH.days).sort();
+  const dhDate = dhDates.indexOf(last) >= 0 ? last : (dhDates.length ? dhDates[dhDates.length-1] : null);
+  const dhDay = dhDate ? (DH.days[dhDate] || null) : null;
+  const dhTag = (dhDate && dhDate !== last) ? ` (截至 ${dhDate.slice(5)})` : "";
   const dhArr = (dhDay && dhDay.depts) ? dhDay.depts.slice() : [];
   const hoursArr = dhArr.slice().filter(x=>x.totalHours>0).sort((a,b)=>b.totalHours-a.totalHours);
   const otHArr = dhArr.slice().filter(x=>x.otHours>0).sort((a,b)=>b.otHours-a.otHours);
-  const emptyCard = (title, tip) => `<div class="chart-card"><h4>${title}</h4><div style="height:${dh}px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:12px;text-align:center;padding:0 10px;">${tip}</div></div>`;
+  const emptyCard = (title, tip) => `<div class="chart-card"><h4>${title}${dhTag}</h4><div style="height:${dh}px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:12px;text-align:center;padding:0 10px;">${tip}</div></div>`;
   const hoursCard = hoursArr.length
-    ? `<div class="chart-card"><h4>各部门总工时</h4><div class="cv" style="height:${dh}px;"><canvas id="chDeptHours"></canvas></div></div>`
+    ? `<div class="chart-card"><h4>各部门总工时${dhTag}</h4><div class="cv" style="height:${dh}px;"><canvas id="chDeptHours"></canvas></div></div>`
     : emptyCard("各部门总工时", "暂无数据 — 待出勤明细 CSV 生成");
   const otHoursCard = otHArr.length
-    ? `<div class="chart-card"><h4>各部门加班工时</h4><div class="cv" style="height:${dh}px;"><canvas id="chDeptOtHours"></canvas></div></div>`
+    ? `<div class="chart-card"><h4>各部门加班工时${dhTag}</h4><div class="cv" style="height:${dh}px;"><canvas id="chDeptOtHours"></canvas></div></div>`
     : emptyCard("各部门加班工时", "暂无数据 — 待出勤明细 CSV 生成");
     deptHTML = `
       <div class="chart-card"><h4>各部门出勤率</h4><div class="cv" style="height:${dh}px;"><canvas id="chDeptRate"></canvas></div></div>
