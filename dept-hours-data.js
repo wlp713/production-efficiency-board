@@ -1,6 +1,6 @@
 // 部门工时 & OT 汇总（aggregate_hours.py 自动生成，来源: 出勤数据/_明细_*.csv）
 window.DEPT_HOURS_DATA = {
- "updatedAt": "2026-08-27 13:26",
+ "updatedAt": "2026-08-27 13:36",
  "days": {
   "2026-08-25": {
    "depts": [
@@ -41,10 +41,10 @@ window.DEPT_HOURS_DATA = {
      "count": 33
     },
     {
-     "dept": "P/E",
-     "totalHours": 269.5,
-     "otHours": 28.5,
-     "count": 30
+     "dept": "PE",
+     "totalHours": 281.0,
+     "otHours": 31.5,
+     "count": 31
     },
     {
      "dept": "Pro.6",
@@ -59,7 +59,7 @@ window.DEPT_HOURS_DATA = {
      "count": 23
     },
     {
-     "dept": "I/P & ED",
+     "dept": "IP＆ED",
      "totalHours": 152.5,
      "otHours": 14.5,
      "count": 17
@@ -71,10 +71,10 @@ window.DEPT_HOURS_DATA = {
      "count": 14
     },
     {
-     "dept": "Design",
-     "totalHours": 107.5,
+     "dept": "R＆D",
+     "totalHours": 116.0,
      "otHours": 0.0,
-     "count": 14
+     "count": 15
     },
     {
      "dept": "Management",
@@ -89,28 +89,16 @@ window.DEPT_HOURS_DATA = {
      "count": 10
     },
     {
-     "dept": "A/C",
+     "dept": "AC",
      "totalHours": 64.0,
      "otHours": 0.0,
      "count": 7
     },
     {
-     "dept": "SPC",
+     "dept": "SP Center",
      "totalHours": 17.0,
      "otHours": 0.0,
      "count": 2
-    },
-    {
-     "dept": "PE",
-     "totalHours": 11.5,
-     "otHours": 3.0,
-     "count": 1
-    },
-    {
-     "dept": "Product Development and Technical Service Platform",
-     "totalHours": 8.5,
-     "otHours": 0.0,
-     "count": 1
     },
     {
      "dept": "P/R",
@@ -167,10 +155,10 @@ window.DEPT_HOURS_DATA = {
      "count": 26
     },
     {
-     "dept": "P/E",
-     "totalHours": 243.5,
+     "dept": "PE",
+     "totalHours": 252.0,
      "otHours": 30.0,
-     "count": 27
+     "count": 28
     },
     {
      "dept": "Pro.5",
@@ -179,7 +167,7 @@ window.DEPT_HOURS_DATA = {
      "count": 23
     },
     {
-     "dept": "I/P & ED",
+     "dept": "IP＆ED",
      "totalHours": 139.0,
      "otHours": 13.5,
      "count": 15
@@ -191,10 +179,10 @@ window.DEPT_HOURS_DATA = {
      "count": 16
     },
     {
-     "dept": "Design",
-     "totalHours": 97.5,
+     "dept": "R＆D",
+     "totalHours": 106.0,
      "otHours": 0.0,
-     "count": 12
+     "count": 13
     },
     {
      "dept": "Sales & Shipping",
@@ -203,7 +191,7 @@ window.DEPT_HOURS_DATA = {
      "count": 10
     },
     {
-     "dept": "A/C",
+     "dept": "AC",
      "totalHours": 69.0,
      "otHours": 0.0,
      "count": 8
@@ -215,7 +203,7 @@ window.DEPT_HOURS_DATA = {
      "count": 9
     },
     {
-     "dept": "SPC",
+     "dept": "SP Center",
      "totalHours": 25.5,
      "otHours": 0.0,
      "count": 3
@@ -225,18 +213,6 @@ window.DEPT_HOURS_DATA = {
      "totalHours": 17.5,
      "otHours": 0.5,
      "count": 2
-    },
-    {
-     "dept": "PE",
-     "totalHours": 8.5,
-     "otHours": 0.0,
-     "count": 1
-    },
-    {
-     "dept": "Product Development and Technical Service Platform",
-     "totalHours": 8.5,
-     "otHours": 0.0,
-     "count": 1
     },
     {
      "dept": "P/R",
