@@ -1,2 +1,3 @@
-// 由 uph_extract.py 自动生成（cron 每天16:50 工作日）
+// 由 uph_extract.py 自动生成（cron 每天16:30 工作日，历史自动累积）
+window.AUTO_UPH_DAYS = {"days": {"2026-08-26": {"date": "2026-08-26", "workedHours": 7.81, "updatedAt": "2026-08-26 17:08:38", "source": "PDT3 data.json", "uphA": 387.3, "actualA": 3025.0, "targetA": 3300.0, "uphB": 371.7, "actualB": 2903.0, "targetB": 3600.0, "uphC": 409.7, "actualC": 3200.0, "targetC": 3400.0, "uphD": 168.4, "actualD": 1315.0, "targetD": 1600.0, "totalActual": 10443.0}}};
 window.AUTO_UPH = {"date": "2026-08-26", "workedHours": 7.81, "updatedAt": "2026-08-26 17:08:38", "source": "PDT3 data.json", "uphA": 387.3, "actualA": 3025.0, "targetA": 3300.0, "uphB": 371.7, "actualB": 2903.0, "targetB": 3600.0, "uphC": 409.7, "actualC": 3200.0, "targetC": 3400.0, "uphD": 168.4, "actualD": 1315.0, "targetD": 1600.0, "totalActual": 10443.0};
