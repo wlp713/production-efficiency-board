@@ -305,8 +305,6 @@
         <div class="kpi kpi-upph k-upph"><div class="k">总 UPPH</div><div class="row"><div class="v" id="kpiUpph">-</div><div class="up"><div class="k">提升幅度</div><div class="v upv" id="kpiUpphUp">-</div></div></div></div>
       </div>
       <div class="charts">
-        <div class="chart-card"><h4><span class="dot" style="background:#6366f1;"></span>各部门总工时</h4><div class="cv"><canvas id="chDeptHoursTop"></canvas></div></div>
-        <div class="chart-card"><h4><span class="dot" style="background:#f97316;"></span>各部门加班工时</h4><div class="cv"><canvas id="chDeptOtHoursTop"></canvas></div></div>
         <div class="chart-card"><h4><span class="dot" style="background:#111827;"></span>UPPH 趋势 <span style="font-weight:500;color:var(--muted);font-size:12px;">最近7天</span></h4><div class="cv"><canvas id="chUpph"></canvas></div></div>
         <div class="chart-card"><h4><span class="dot" style="background:#16a34a;"></span>总产出趋势 <span style="font-weight:500;color:var(--muted);font-size:12px;">最近7天</span></h4><div class="cv"><canvas id="chPlan"></canvas></div></div>
         <div class="chart-card"><h4><span class="dot" style="background:#0ea5e9;"></span>A线 UPH 趋势 <span style="font-weight:500;color:var(--muted);font-size:12px;">最近7天</span></h4><div class="cv"><canvas id="chUphA"></canvas></div></div>
@@ -326,9 +324,9 @@
   </section>
 </main>
 
-<script src="attendance-data.js?v=202608271315"></script>
-<script src="dept-hours-data.js?v=202608271315"></script>
-<script src="auto-uph.js?v=202608271315"></script>
+<script src="attendance-data.js?v=202608271317"></script>
+<script src="dept-hours-data.js?v=202608271317"></script>
+<script src="auto-uph.js?v=202608271317"></script>
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <script>
 /* ═══════════════════════════════════════════════
@@ -696,42 +694,7 @@ function renderBoard(){
       { type:"line", label:"总产出 趋势", data:linReg(dayOut), borderColor:"rgba(79,70,229,.4)", borderWidth:1.5, borderDash:[5,4], fill:false, pointRadius:0, datalabels:{display:false} }]},
     options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false}, tooltip:tip, datalabels:{ color:"#475569", font:{size:11, weight:"600"}, anchor:"end", align:"top", offset:2, formatter:v => (v==null||v===0) ? "" : Number(v).toLocaleString("en-US"), display:"auto" } },
       scales:{ y:{ beginAtZero:true, max:topMax(dayOut), grid:gridC, ticks:{ font:{size:9}, color:"#94a3b8" } }, x:{ grid:{display:false}, ticks:{ font:{size:9}, color:"#94a3b8" } } } } });
-  renderDeptHoursTop();
   renderAttendance();
-}
-
-/* ── 部门工时/加班工时（dept-hours-data.js，看板顶部直接展示） ── */
-function renderDeptHoursTop(){
-  const DH = window.DEPT_HOURS_DATA || {days:{}};
-  const ds = Object.keys(DH.days).sort();
-  const d = ds.length ? DH.days[ds[ds.length-1]] : null;
-  const dhTag = d ? ` <span style="font-weight:500;color:var(--muted);font-size:12px;">截至 ${d.date}</span>` : "";
-  const gridC2 = { color:"#eef1f4" };
-  const tip2 = { backgroundColor:"#0f172a", titleFont:{family:"Noto Sans SC"}, bodyFont:{family:"JetBrains Mono"} };
-  const fill = (cid, title, arr, key, color, border, tcolor) => {
-    const c = document.getElementById(cid);
-    if(!c) return;
-    const parent = c.closest(".chart-card");
-    const h4 = parent ? parent.querySelector("h4") : null;
-    if(!arr || !arr.length){
-      if(h4) h4.innerHTML = title + dhTag;
-      c.parentNode.innerHTML = `<div style="height:150px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:12px;text-align:center;padding:0 10px;">暂无数据 — 待出勤明细 CSV 生成</div>`;
-      return;
-    }
-    if(h4) h4.innerHTML = title + dhTag;
-    const labels = arr.map(x=>x.dept), data = arr.map(x=>x[key]||0);
-    charts[cid] = new Chart(c, { type:"bar",
-      data:{ labels, datasets:[{ label:title, data, backgroundColor:color, borderColor:border, borderWidth:1, borderRadius:3 }] },
-      options:{ responsive:true, maintainAspectRatio:false,
-        plugins:{ legend:{display:false}, tooltip:tip2,
-          datalabels:{ color:tcolor, font:{size:10, weight:"600"}, anchor:"end", align:"top", offset:2,
-            formatter: v => (v==null||v===0) ? "" : Number(v).toLocaleString("en-US"), display:"auto" } },
-        scales:{ y:{ beginAtZero:true, max:topMax(data), grid:gridC2, ticks:{ font:{size:9}, color:"#94a3b8" } }, x:{ grid:{display:false}, ticks:{ font:{size:9}, maxRotation:60, minRotation:0 } } } } });
-  };
-  const hoursArr = (d && d.depts) ? d.depts.slice().filter(x=>x.totalHours>0).sort((a,b)=>b.totalHours-a.totalHours) : [];
-  const otArr = (d && d.depts) ? d.depts.slice().filter(x=>x.otHours>0).sort((a,b)=>b.otHours-a.otHours) : [];
-  fill("chDeptHoursTop", "各部门总工时", hoursArr, "totalHours", "#c7d2fe", "#a5b4fc", "#3730a3");
-  fill("chDeptOtHoursTop", "各部门加班工时", otArr, "otHours", "#fed7aa", "#fdba74", "#9a3412");
 }
 
 /* ── 出勤数据（attendance-data.js 提供，每日中午由脚本自动更新） ── */
