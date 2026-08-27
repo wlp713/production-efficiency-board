@@ -95,13 +95,13 @@ window.ATTENDANCE_DATA = {
     },
     {
      "dept": "HR",
-     "zai": 11.0,
-     "chu": 11.0,
-     "rate": 100.0
+     "zai": 0.0,
+     "chu": 0.0,
+     "rate": null
     }
    ],
-   "totalZai": 1123.0,
-   "totalChu": 1105.0,
+   "totalZai": 1112.0,
+   "totalChu": 1094.0,
    "rate": 98.4
   },
   "2026-08-03": {
@@ -1192,8 +1192,8 @@ window.ATTENDANCE_DATA = {
     },
     {
      "dept": "PC",
-     "zai": 47.0,
-     "chu": 47.0,
+     "zai": 37.0,
+     "chu": 37.0,
      "rate": 100.0
     },
     {
@@ -1228,14 +1228,14 @@ window.ATTENDANCE_DATA = {
     },
     {
      "dept": "HR",
-     "zai": 11.0,
-     "chu": 11.0,
-     "rate": 100.0
+     "zai": 0.0,
+     "chu": 0.0,
+     "rate": null
     }
    ],
-   "totalZai": 1122.0,
-   "totalChu": 1084.0,
-   "rate": 96.6
+   "totalZai": 1101.0,
+   "totalChu": 1063.0,
+   "rate": 96.5
   },
   "2026-08-26": {
    "depts": [
@@ -1247,9 +1247,9 @@ window.ATTENDANCE_DATA = {
     },
     {
      "dept": "Pro.2",
-     "zai": 0.0,
-     "chu": 0.0,
-     "rate": null
+     "zai": 467.0,
+     "chu": 451.0,
+     "rate": 96.6
     },
     {
      "dept": "Pro.3",
@@ -1295,9 +1295,9 @@ window.ATTENDANCE_DATA = {
     },
     {
      "dept": "PC",
-     "zai": 0.0,
-     "chu": 0.0,
-     "rate": null
+     "zai": 46.0,
+     "chu": 45.0,
+     "rate": 97.8
     },
     {
      "dept": "QA",
@@ -1331,15 +1331,118 @@ window.ATTENDANCE_DATA = {
     },
     {
      "dept": "HR",
+     "zai": 11.0,
+     "chu": 11.0,
+     "rate": 100.0
+    }
+   ],
+   "totalZai": 1114.0,
+   "totalChu": 1077.0,
+   "rate": 96.7
+  },
+  "2026-08-27": {
+   "depts": [
+    {
+     "dept": "Pro.1",
+     "zai": 136.0,
+     "chu": 132.0,
+     "rate": 97.1
+    },
+    {
+     "dept": "Pro.2",
+     "zai": 467.0,
+     "chu": 458.0,
+     "rate": 98.1
+    },
+    {
+     "dept": "Pro.3",
+     "zai": 85.0,
+     "chu": 79.0,
+     "rate": 92.9
+    },
+    {
+     "dept": "Pro.4",
+     "zai": 158.0,
+     "chu": 152.0,
+     "rate": 96.2
+    },
+    {
+     "dept": "Pro.5",
+     "zai": 26.0,
+     "chu": 25.0,
+     "rate": 96.2
+    },
+    {
+     "dept": "Pro.6",
+     "zai": 29.0,
+     "chu": 29.0,
+     "rate": 100.0
+    },
+    {
+     "dept": "PE",
+     "zai": 32.0,
+     "chu": 30.0,
+     "rate": 93.8
+    },
+    {
+     "dept": "IP＆ED",
+     "zai": 19.0,
+     "chu": 18.0,
+     "rate": 94.7
+    },
+    {
+     "dept": "MBS",
+     "zai": 5.0,
+     "chu": 5.0,
+     "rate": 100.0
+    },
+    {
+     "dept": "PC",
+     "zai": 46.0,
+     "chu": 46.0,
+     "rate": 100.0
+    },
+    {
+     "dept": "QA",
+     "zai": 43.0,
+     "chu": 42.0,
+     "rate": 97.7
+    },
+    {
+     "dept": "SP Center",
+     "zai": 3.0,
+     "chu": 3.0,
+     "rate": 100.0
+    },
+    {
+     "dept": "Purchasing",
+     "zai": 21.0,
+     "chu": 19.0,
+     "rate": 90.5
+    },
+    {
+     "dept": "R＆D",
+     "zai": 18.0,
+     "chu": 18.0,
+     "rate": 100.0
+    },
+    {
+     "dept": "AC",
+     "zai": 13.0,
+     "chu": 13.0,
+     "rate": 100.0
+    },
+    {
+     "dept": "HR",
      "zai": 0.0,
      "chu": 0.0,
      "rate": null
     }
    ],
-   "totalZai": 590.0,
-   "totalChu": 570.0,
-   "rate": 96.6
+   "totalZai": 1101.0,
+   "totalChu": 1069.0,
+   "rate": 97.1
   }
  },
- "updatedAt": "2026-08-26 13:08"
+ "updatedAt": "2026-08-27 12:00"
 };
