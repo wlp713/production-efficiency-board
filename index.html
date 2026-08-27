@@ -423,28 +423,38 @@ let editingId = null;
 
 /* ── PDT3 自动取数导入（auto-uph.js 提供，cron 每天 16:30 工作日生成） ── */
 function autoImport(){
-  const A = window.AUTO_UPH;
-  if(!A || !A.date) return;
-  const today = todayStr(0);
-  if(A.date !== today) return;                        // 只导入当天的自动数据
-  if(db.some(r=>r.date===today)) return;              // 当天已有记录（手录优先）→ 不覆盖
-  const abc = [A.uphA, A.uphB, A.uphC].filter(v=>v>0);
-  const rec = {
-    id: Date.now(), date: today,
-    totalOutput: Math.round(A.totalActual||0),        // 四线实际产量合计，可改
-    totalHours: 0, totalHead: 0,                       // 工时/人数待用户补充
-    uphA: A.uphA||0, uphB: A.uphB||0, uphC: A.uphC||0, uphD: A.uphD||0,
-    avgUph: abc.length ? abc.reduce((a,b)=>a+b,0)/abc.length : 0,
-    upph: 0, personHours: 0, updatedAt: new Date().toISOString(), autoImported: true
-  };
-  db.push(rec);
-  db.sort((a,b)=> a.date<b.date?-1:1);
-  persist();
-  renderHist();
-  // 回填表单，让用户补充工时/人数后保存
-  $("fDate").value = today;
-  loadForm(today);
-  $("saveMsg").textContent = "🤖 已自动填入 PDT3 的 ABCD UPH（" + fmtDateCN(today) + "），请补充总工时/总人数后保存";
+  // 多天历史自动填充（AUTO_UPH_DAYS 由 cron 每日累积）：db 缺失日期自动补入，手动录入优先不覆盖
+  const AD = (window.AUTO_UPH_DAYS && window.AUTO_UPH_DAYS.days) || {};
+  const days = Object.keys(AD).sort();
+  let added = 0;
+  days.forEach(ds=>{
+    if(db.some(r=>r.date===ds)) return;               // 已有记录（手录优先）→ 不覆盖
+    const d = AD[ds] || {};
+    const abc = [d.uphA, d.uphB, d.uphC].filter(v=>v>0);
+    // 工时/人数自动关联：工时汇总(dept-hours-data.js) + 出勤(attendance-data.js)
+    let totalHours = 0, totalHead = 0;
+    try{
+      const DH = (window.DEPT_HOURS_DATA && window.DEPT_HOURS_DATA.days) || {};
+      if(DH[ds]) totalHours = DH[ds].totalHours || 0;
+      const AT = (window.ATTENDANCE_DATA && window.ATTENDANCE_DATA.days) || {};
+      if(AT[ds]) totalHead = Math.round(AT[ds].totalChu || 0);
+    }catch(e){}
+    db.push({
+      id: Date.now() + added, date: ds,
+      totalOutput: Math.round(d.totalActual || 0),   // 四线实际产量合计
+      totalHours: totalHours, totalHead: totalHead,
+      uphA: d.uphA||0, uphB: d.uphB||0, uphC: d.uphC||0, uphD: d.uphD||0,
+      avgUph: abc.length ? abc.reduce((a,b)=>a+b,0)/abc.length : 0,
+      upph: (totalHours>0 && d.totalActual) ? +(d.totalActual/totalHours).toFixed(2) : 0,
+      personHours: totalHours, updatedAt: new Date().toISOString(), autoImported: true
+    });
+    added++;
+  });
+  if(added){
+    db.sort((a,b)=> a.date<b.date?-1:1);
+    persist();
+    renderHist();
+  }
 }
 function initForm(){
   $("fDate").value = todayStr(-1);   // 默认昨天
