@@ -1,6 +1,6 @@
 // 部门工时 & OT 汇总（aggregate_hours.py 自动生成，来源: 出勤数据/_明细_*.csv）
 window.DEPT_HOURS_DATA = {
- "updatedAt": "2026-08-27 11:02",
+ "updatedAt": "2026-08-27 12:04",
  "days": {
   "2026-08-25": {
    "depts": [
