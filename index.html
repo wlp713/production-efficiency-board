@@ -324,9 +324,9 @@
   </section>
 </main>
 
-<script src="attendance-data.js?v=202608271326"></script>
-<script src="dept-hours-data.js?v=202608271326"></script>
-<script src="auto-uph.js?v=202608271326"></script>
+<script src="attendance-data.js?v=202608271331"></script>
+<script src="dept-hours-data.js?v=202608271331"></script>
+<script src="auto-uph.js?v=202608271331"></script>
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <script>
 /* ═══════════════════════════════════════════════
@@ -748,7 +748,8 @@ function renderAttendance(){
   const dhTag = (dhDate && dhDate !== last) ? ` (截至 ${dhDate.slice(5)})` : "";
   const dhArr = (dhDay && dhDay.depts) ? dhDay.depts.slice() : [];
   const hoursArr = dhArr.slice().filter(x=>x.totalHours>0).sort((a,b)=>b.totalHours-a.totalHours);
-  const otHArr = dhArr.slice().filter(x=>x.otHours>0).sort((a,b)=>b.otHours-a.otHours);
+  // 加班图与总工时图同部门同顺序（标签同步），ot=0 的部门保留为 0 柱
+  const otHArr = hoursArr.map(x=>({dept:x.dept, otHours:x.otHours||0}));
   // 加班费：录入模块（localStorage production_ot_cost_v1），后续将自动取数
   const otRaw = (function(){ try{ return JSON.parse(localStorage.getItem(OT_KEY)||"{}"); }catch(e){ return {}; } })();
   const otDay = otRaw[last]||{};
@@ -765,11 +766,14 @@ function renderAttendance(){
       ? `<div class="chart-card"><h4>各部门加班费</h4><div class="cv" style="height:${dh}px;"><canvas id="chDeptOT"></canvas></div></div>`
       : `<div class="chart-card"><h4>各部门加班费</h4><div style="height:${dh}px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:12px;text-align:center;padding:0 10px;">暂无录入 — 到「录入」页加班费模块添加</div></div>`;
     const emptyCard = (title, tip) => `<div class="chart-card"><h4>${title}${dhTag}</h4><div style="height:${dh}px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:12px;text-align:center;padding:0 10px;">${tip}</div></div>`;
+  const fmtInt = v => Number(v||0).toLocaleString("en-US");
+  const sumH = hoursArr.reduce((a,b)=>a+b.totalHours,0);
+  const sumO = otHArr.reduce((a,b)=>a+b.otHours,0);
   const hoursCard = hoursArr.length
-    ? `<div class="chart-card"><h4>各部门总工时${dhTag}</h4><div class="cv" style="height:${dh}px;"><canvas id="chDeptHours"></canvas></div></div>`
+    ? `<div class="chart-card"><h4>各部门总工时 · 合计 ${fmtInt(sumH)}h</h4><div class="cv" style="height:${dh}px;"><canvas id="chDeptHours"></canvas></div></div>`
     : emptyCard("各部门总工时", "暂无数据 — 待出勤明细 CSV 生成");
   const otHoursCard = otHArr.length
-    ? `<div class="chart-card"><h4>各部门加班工时${dhTag}</h4><div class="cv" style="height:${dh}px;"><canvas id="chDeptOtHours"></canvas></div></div>`
+    ? `<div class="chart-card"><h4>各部门加班工时 · 合计 ${fmtInt(sumO)}h</h4><div class="cv" style="height:${dh}px;"><canvas id="chDeptOtHours"></canvas></div></div>`
     : emptyCard("各部门加班工时", "暂无数据 — 待出勤明细 CSV 生成");
     deptHTML = `
       <div class="chart-card"><h4>各部门出勤率</h4><div class="cv" style="height:${dh}px;"><canvas id="chDeptRate"></canvas></div></div>
@@ -826,25 +830,29 @@ function renderAttendance(){
           datalabels:{ color:rLabelC, font:{size:10, weight:"600"}, anchor:"end", align:"top", offset:2,
             formatter: v => (v==null) ? "" : v.toFixed(1)+"%" } },
         scales:{ y:{ min:0, max:110, stepSize:10, grid:gridA, ticks:{ font:{size:9}, callback:v=>v+"%" } }, x:{ grid:{display:false}, ticks:{ font:{size:9}, maxRotation:60, minRotation:0 } } } } });
-    // 各部门总工时（降序，靛蓝浅色）
+    // 各部门总工时（降序，灰柱+最高靛蓝，与其他部门图样式统一）
     if(hoursArr.length){
       const hLabels = hoursArr.map(d=>d.dept), hData = hoursArr.map(d=>d.totalHours);
+      const hMax = Math.max(...hData);
       charts.deptHours = new Chart($("chDeptHours"), { type:"bar",
-        data:{ labels:hLabels, datasets:[{ label:"总工时(h)", data:hData, backgroundColor:"#c7d2fe", borderColor:"#a5b4fc", borderWidth:1, borderRadius:3 }] },
+        data:{ labels:hLabels, datasets:[{ label:"总工时(h)", data:hData,
+          backgroundColor:hData.map(v=> v>=hMax ? ACC : BAR), borderColor:hData.map(v=> v>=hMax ? ACC : BARB), borderWidth:1, borderRadius:3 }] },
         options:{ responsive:true, maintainAspectRatio:false,
           plugins:{ legend:{display:false}, tooltip:tipA,
-            datalabels:{ color:"#3730a3", font:{size:10, weight:"600"}, anchor:"end", align:"top", offset:2,
+            datalabels:{ color:"#475569", font:{size:10, weight:"600"}, anchor:"end", align:"top", offset:2,
               formatter: v => (v==null||v===0) ? "" : Number(v).toLocaleString("en-US"), display:"auto" } },
           scales:{ y:{ beginAtZero:true, max:topMax(hData), grid:gridA, ticks:{ font:{size:9}, color:"#94a3b8" } }, x:{ grid:{display:false}, ticks:{ font:{size:9}, maxRotation:60, minRotation:0 } } } } });
     }
-    // 各部门加班工时（降序，橙色）
+    // 各部门加班工时（与总工时图同部门同顺序，样式统一）
     if(otHArr.length){
       const oLabels = otHArr.map(d=>d.dept), oData = otHArr.map(d=>d.otHours);
+      const oMax = Math.max(...oData);
       charts.deptOtHours = new Chart($("chDeptOtHours"), { type:"bar",
-        data:{ labels:oLabels, datasets:[{ label:"加班工时(h)", data:oData, backgroundColor:"#fed7aa", borderColor:"#fdba74", borderWidth:1, borderRadius:3 }] },
+        data:{ labels:oLabels, datasets:[{ label:"加班工时(h)", data:oData,
+          backgroundColor:oData.map(v=> v>0 && v>=oMax ? ACC : BAR), borderColor:oData.map(v=> v>0 && v>=oMax ? ACC : BARB), borderWidth:1, borderRadius:3 }] },
         options:{ responsive:true, maintainAspectRatio:false,
           plugins:{ legend:{display:false}, tooltip:tipA,
-            datalabels:{ color:"#9a3412", font:{size:10, weight:"600"}, anchor:"end", align:"top", offset:2,
+            datalabels:{ color:"#475569", font:{size:10, weight:"600"}, anchor:"end", align:"top", offset:2,
               formatter: v => (v==null||v===0) ? "" : Number(v).toLocaleString("en-US"), display:"auto" } },
           scales:{ y:{ beginAtZero:true, max:topMax(oData), grid:gridA, ticks:{ font:{size:9}, color:"#94a3b8" } }, x:{ grid:{display:false}, ticks:{ font:{size:9}, maxRotation:60, minRotation:0 } } } } });
     }
