@@ -324,9 +324,9 @@
   </section>
 </main>
 
-<script src="attendance-data.js?v=202608271317"></script>
-<script src="dept-hours-data.js?v=202608271317"></script>
-<script src="auto-uph.js?v=202608271317"></script>
+<script src="attendance-data.js?v=202608271326"></script>
+<script src="dept-hours-data.js?v=202608271326"></script>
+<script src="auto-uph.js?v=202608271326"></script>
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <script>
 /* ═══════════════════════════════════════════════
@@ -739,6 +739,16 @@ function renderAttendance(){
   const depts = (latest.depts||[]).filter(d=>d.zai>0);
   const deptsByZai = depts.slice().sort((a,b)=>b.zai-a.zai);
   const deptsByRate = depts.slice().filter(d=>d.rate!=null).sort((a,b)=>b.rate-a.rate).concat(depts.filter(d=>d.rate==null));
+  // 部门工时 & OT 汇总（dept-hours-data.js 提供，聚合自出勤明细 CSV）
+  // 当天无工时数据时回退到最近有数据的日期，并在标题标注
+  const DH = window.DEPT_HOURS_DATA || {days:{}};
+  const dhDates = Object.keys(DH.days).sort();
+  const dhDate = dhDates.indexOf(last) >= 0 ? last : (dhDates.length ? dhDates[dhDates.length-1] : null);
+  const dhDay = dhDate ? (DH.days[dhDate] || null) : null;
+  const dhTag = (dhDate && dhDate !== last) ? ` (截至 ${dhDate.slice(5)})` : "";
+  const dhArr = (dhDay && dhDay.depts) ? dhDay.depts.slice() : [];
+  const hoursArr = dhArr.slice().filter(x=>x.totalHours>0).sort((a,b)=>b.totalHours-a.totalHours);
+  const otHArr = dhArr.slice().filter(x=>x.otHours>0).sort((a,b)=>b.otHours-a.otHours);
   // 加班费：录入模块（localStorage production_ot_cost_v1），后续将自动取数
   const otRaw = (function(){ try{ return JSON.parse(localStorage.getItem(OT_KEY)||"{}"); }catch(e){ return {}; } })();
   const otDay = otRaw[last]||{};
@@ -754,17 +764,7 @@ function renderAttendance(){
     const otCard = otArr.length
       ? `<div class="chart-card"><h4>各部门加班费</h4><div class="cv" style="height:${dh}px;"><canvas id="chDeptOT"></canvas></div></div>`
       : `<div class="chart-card"><h4>各部门加班费</h4><div style="height:${dh}px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:12px;text-align:center;padding:0 10px;">暂无录入 — 到「录入」页加班费模块添加</div></div>`;
-  // 部门工时 & OT 汇总（dept-hours-data.js 提供，聚合自出勤明细 CSV）
-  // 当天无工时数据时回退到最近有数据的日期，并在标题标注
-  const DH = window.DEPT_HOURS_DATA || {days:{}};
-  const dhDates = Object.keys(DH.days).sort();
-  const dhDate = dhDates.indexOf(last) >= 0 ? last : (dhDates.length ? dhDates[dhDates.length-1] : null);
-  const dhDay = dhDate ? (DH.days[dhDate] || null) : null;
-  const dhTag = (dhDate && dhDate !== last) ? ` (截至 ${dhDate.slice(5)})` : "";
-  const dhArr = (dhDay && dhDay.depts) ? dhDay.depts.slice() : [];
-  const hoursArr = dhArr.slice().filter(x=>x.totalHours>0).sort((a,b)=>b.totalHours-a.totalHours);
-  const otHArr = dhArr.slice().filter(x=>x.otHours>0).sort((a,b)=>b.otHours-a.otHours);
-  const emptyCard = (title, tip) => `<div class="chart-card"><h4>${title}${dhTag}</h4><div style="height:${dh}px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:12px;text-align:center;padding:0 10px;">${tip}</div></div>`;
+    const emptyCard = (title, tip) => `<div class="chart-card"><h4>${title}${dhTag}</h4><div style="height:${dh}px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:12px;text-align:center;padding:0 10px;">${tip}</div></div>`;
   const hoursCard = hoursArr.length
     ? `<div class="chart-card"><h4>各部门总工时${dhTag}</h4><div class="cv" style="height:${dh}px;"><canvas id="chDeptHours"></canvas></div></div>`
     : emptyCard("各部门总工时", "暂无数据 — 待出勤明细 CSV 生成");

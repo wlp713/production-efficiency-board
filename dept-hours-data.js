@@ -1,62 +1,38 @@
 // 部门工时 & OT 汇总（aggregate_hours.py 自动生成，来源: 出勤数据/_明细_*.csv）
 window.DEPT_HOURS_DATA = {
- "updatedAt": "2026-08-27 12:04",
+ "updatedAt": "2026-08-27 13:26",
  "days": {
   "2026-08-25": {
    "depts": [
     {
      "dept": "Pro.2",
-     "totalHours": 2964.5,
-     "otHours": 626.0,
-     "count": 271
-    },
-    {
-     "dept": "Myanmar Pro.2",
-     "totalHours": 1989.0,
-     "otHours": 449.5,
-     "count": 167
+     "totalHours": 4953.5,
+     "otHours": 1075.5,
+     "count": 438
     },
     {
      "dept": "Pro.4",
-     "totalHours": 1188.5,
-     "otHours": 197.5,
-     "count": 118
+     "totalHours": 1639.5,
+     "otHours": 292.5,
+     "count": 157
     },
     {
      "dept": "Pro.1",
-     "totalHours": 809.5,
-     "otHours": 123.0,
-     "count": 82
-    },
-    {
-     "dept": "Myanmar Pro.3",
-     "totalHours": 504.0,
-     "otHours": 120.5,
-     "count": 42
-    },
-    {
-     "dept": "Myanmar Pro.1",
-     "totalHours": 502.0,
-     "otHours": 93.5,
-     "count": 45
-    },
-    {
-     "dept": "Myanmar Pro.4",
-     "totalHours": 451.0,
-     "otHours": 95.0,
-     "count": 39
-    },
-    {
-     "dept": "PC",
-     "totalHours": 392.0,
-     "otHours": 73.0,
-     "count": 39
+     "totalHours": 1311.5,
+     "otHours": 216.5,
+     "count": 127
     },
     {
      "dept": "Pro.3",
-     "totalHours": 337.0,
-     "otHours": 56.0,
-     "count": 33
+     "totalHours": 841.0,
+     "otHours": 176.5,
+     "count": 75
+    },
+    {
+     "dept": "PC",
+     "totalHours": 441.0,
+     "otHours": 85.0,
+     "count": 43
     },
     {
      "dept": "QA",
@@ -72,15 +48,15 @@ window.DEPT_HOURS_DATA = {
     },
     {
      "dept": "Pro.6",
-     "totalHours": 243.0,
-     "otHours": 25.0,
-     "count": 25
+     "totalHours": 267.0,
+     "otHours": 31.0,
+     "count": 27
     },
     {
      "dept": "Pro.5",
-     "totalHours": 218.5,
-     "otHours": 34.5,
-     "count": 22
+     "totalHours": 229.0,
+     "otHours": 36.5,
+     "count": 23
     },
     {
      "dept": "I/P & ED",
@@ -119,18 +95,6 @@ window.DEPT_HOURS_DATA = {
      "count": 7
     },
     {
-     "dept": "Myanmar PC",
-     "totalHours": 49.0,
-     "otHours": 12.0,
-     "count": 4
-    },
-    {
-     "dept": "Myanmar Pro.6",
-     "totalHours": 24.0,
-     "otHours": 6.0,
-     "count": 2
-    },
-    {
      "dept": "SPC",
      "totalHours": 17.0,
      "otHours": 0.0,
@@ -140,12 +104,6 @@ window.DEPT_HOURS_DATA = {
      "dept": "PE",
      "totalHours": 11.5,
      "otHours": 3.0,
-     "count": 1
-    },
-    {
-     "dept": "Myanmar Pro.5",
-     "totalHours": 10.5,
-     "otHours": 2.0,
      "count": 1
     },
     {
@@ -168,51 +126,33 @@ window.DEPT_HOURS_DATA = {
    "depts": [
     {
      "dept": "Pro.2",
-     "totalHours": 2805.5,
-     "otHours": 546.0,
-     "count": 268
-    },
-    {
-     "dept": "Myanmar Pro.2",
-     "totalHours": 2022.0,
-     "otHours": 464.5,
-     "count": 168
+     "totalHours": 4827.5,
+     "otHours": 1010.5,
+     "count": 436
     },
     {
      "dept": "Pro.4",
-     "totalHours": 1198.0,
-     "otHours": 185.5,
-     "count": 121
+     "totalHours": 1636.0,
+     "otHours": 275.0,
+     "count": 159
     },
     {
      "dept": "Pro.1",
-     "totalHours": 966.0,
-     "otHours": 201.0,
-     "count": 90
+     "totalHours": 1474.0,
+     "otHours": 307.0,
+     "count": 134
     },
     {
-     "dept": "Myanmar Pro.1",
-     "totalHours": 508.0,
-     "otHours": 106.0,
-     "count": 44
-    },
-    {
-     "dept": "Myanmar Pro.3",
-     "totalHours": 473.0,
-     "otHours": 91.0,
-     "count": 44
-    },
-    {
-     "dept": "Myanmar Pro.4",
-     "totalHours": 438.0,
-     "otHours": 89.5,
-     "count": 38
+     "dept": "Pro.3",
+     "totalHours": 822.0,
+     "otHours": 148.5,
+     "count": 77
     },
     {
      "dept": "PC",
-     "totalHours": 407.0,
-     "otHours": 92.0,
-     "count": 38
+     "totalHours": 456.0,
+     "otHours": 104.0,
+     "count": 42
     },
     {
      "dept": "QA",
@@ -221,10 +161,10 @@ window.DEPT_HOURS_DATA = {
      "count": 36
     },
     {
-     "dept": "Pro.3",
-     "totalHours": 349.0,
-     "otHours": 57.5,
-     "count": 33
+     "dept": "Pro.6",
+     "totalHours": 264.0,
+     "otHours": 37.0,
+     "count": 26
     },
     {
      "dept": "P/E",
@@ -233,16 +173,10 @@ window.DEPT_HOURS_DATA = {
      "count": 27
     },
     {
-     "dept": "Pro.6",
-     "totalHours": 240.0,
-     "otHours": 31.0,
-     "count": 24
-    },
-    {
      "dept": "Pro.5",
-     "totalHours": 222.0,
-     "otHours": 38.5,
-     "count": 22
+     "totalHours": 233.0,
+     "otHours": 40.5,
+     "count": 23
     },
     {
      "dept": "I/P & ED",
@@ -281,43 +215,19 @@ window.DEPT_HOURS_DATA = {
      "count": 9
     },
     {
-     "dept": "Myanmar PC",
-     "totalHours": 49.0,
-     "otHours": 12.0,
-     "count": 4
-    },
-    {
      "dept": "SPC",
      "totalHours": 25.5,
      "otHours": 0.0,
      "count": 3
     },
     {
-     "dept": "Myanmar Pro.6",
-     "totalHours": 24.0,
-     "otHours": 6.0,
+     "dept": "MBS",
+     "totalHours": 17.5,
+     "otHours": 0.5,
      "count": 2
     },
     {
-     "dept": "Myanmar Pro.5",
-     "totalHours": 11.0,
-     "otHours": 2.0,
-     "count": 1
-    },
-    {
-     "dept": "MBS",
-     "totalHours": 9.0,
-     "otHours": 0.5,
-     "count": 1
-    },
-    {
      "dept": "PE",
-     "totalHours": 8.5,
-     "otHours": 0.0,
-     "count": 1
-    },
-    {
-     "dept": "Myanmar MBS",
      "totalHours": 8.5,
      "otHours": 0.0,
      "count": 1
