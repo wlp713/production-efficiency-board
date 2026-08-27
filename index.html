@@ -324,9 +324,9 @@
   </section>
 </main>
 
-<script src="attendance-data.js?v=202608271336"></script>
-<script src="dept-hours-data.js?v=202608271336"></script>
-<script src="auto-uph.js?v=202608271336"></script>
+<script src="attendance-data.js?v=202608271339"></script>
+<script src="dept-hours-data.js?v=202608271339"></script>
+<script src="auto-uph.js?v=202608271339"></script>
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <script>
 /* ═══════════════════════════════════════════════
@@ -841,7 +841,7 @@ function renderAttendance(){
           plugins:{ legend:{display:false}, tooltip:tipA,
             datalabels:{ color:"#475569", font:{size:10, weight:"600"}, anchor:"end", align:"top", offset:2,
               formatter: v => (v==null||v===0) ? "" : Number(v).toLocaleString("en-US"), display:"auto" } },
-          scales:{ y:{ beginAtZero:true, max:topMax(hData), grid:gridA, ticks:{ font:{size:9}, color:"#94a3b8" } }, x:{ grid:{display:false}, ticks:{ font:{size:9}, maxRotation:0, minRotation:0 } } } } });
+          scales:{ y:{ beginAtZero:true, max:topMax(hData), grid:gridA, ticks:{ font:{size:9}, color:"#94a3b8" } }, x:{ grid:{display:false}, ticks:{ font:{size:9}, maxRotation:60, minRotation:0, autoSkip:false } } } } });
     }
     // 各部门加班工时（与总工时图同部门同顺序，样式统一）
     if(otHArr.length){
@@ -854,7 +854,7 @@ function renderAttendance(){
           plugins:{ legend:{display:false}, tooltip:tipA,
             datalabels:{ color:"#475569", font:{size:10, weight:"600"}, anchor:"end", align:"top", offset:2,
               formatter: v => (v==null||v===0) ? "" : Number(v).toLocaleString("en-US"), display:"auto" } },
-          scales:{ y:{ beginAtZero:true, max:topMax(oData), grid:gridA, ticks:{ font:{size:9}, color:"#94a3b8" } }, x:{ grid:{display:false}, ticks:{ font:{size:9}, maxRotation:0, minRotation:0 } } } } });
+          scales:{ y:{ beginAtZero:true, max:topMax(oData), grid:gridA, ticks:{ font:{size:9}, color:"#94a3b8" } }, x:{ grid:{display:false}, ticks:{ font:{size:9}, maxRotation:60, minRotation:0, autoSkip:false } } } } });
     }
     // 各部门加班费（金额降序，琥珀金）
     if(otArr.length){
