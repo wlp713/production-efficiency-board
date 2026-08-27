@@ -1,6 +1,6 @@
 // 部门工时 & OT 汇总（aggregate_hours.py 自动生成，来源: 出勤数据/_明细_*.csv）
 window.DEPT_HOURS_DATA = {
- "updatedAt": "2026-08-27 11:01",
+ "updatedAt": "2026-08-27 11:02",
  "days": {
   "2026-08-25": {
    "depts": [
@@ -167,10 +167,10 @@ window.DEPT_HOURS_DATA = {
   "2026-08-26": {
    "depts": [
     {
-     "dept": "Manufacturing Plant",
-     "totalHours": 5737.0,
-     "otHours": 1037.5,
-     "count": 561
+     "dept": "Pro.2",
+     "totalHours": 2805.5,
+     "otHours": 546.0,
+     "count": 268
     },
     {
      "dept": "Myanmar Pro.2",
@@ -179,22 +179,22 @@ window.DEPT_HOURS_DATA = {
      "count": 168
     },
     {
-     "dept": "Intelligent Manufacturing",
-     "totalHours": 867.5,
-     "otHours": 113.0,
-     "count": 92
+     "dept": "Pro.4",
+     "totalHours": 1198.0,
+     "otHours": 185.5,
+     "count": 121
+    },
+    {
+     "dept": "Pro.1",
+     "totalHours": 966.0,
+     "otHours": 201.0,
+     "count": 90
     },
     {
      "dept": "Myanmar Pro.1",
      "totalHours": 508.0,
      "otHours": 106.0,
      "count": 44
-    },
-    {
-     "dept": "Pro.2",
-     "totalHours": 485.0,
-     "otHours": 97.5,
-     "count": 45
     },
     {
      "dept": "Myanmar Pro.3",
@@ -209,34 +209,76 @@ window.DEPT_HOURS_DATA = {
      "count": 38
     },
     {
-     "dept": "Pro.1",
-     "totalHours": 286.0,
-     "otHours": 56.0,
+     "dept": "PC",
+     "totalHours": 407.0,
+     "otHours": 92.0,
+     "count": 38
+    },
+    {
+     "dept": "QA",
+     "totalHours": 359.0,
+     "otHours": 54.5,
+     "count": 36
+    },
+    {
+     "dept": "Pro.3",
+     "totalHours": 349.0,
+     "otHours": 57.5,
+     "count": 33
+    },
+    {
+     "dept": "P/E",
+     "totalHours": 243.5,
+     "otHours": 30.0,
      "count": 27
     },
     {
-     "dept": "Operation Management Platform",
-     "totalHours": 179.5,
+     "dept": "Pro.6",
+     "totalHours": 240.0,
+     "otHours": 31.0,
+     "count": 24
+    },
+    {
+     "dept": "Pro.5",
+     "totalHours": 222.0,
+     "otHours": 38.5,
+     "count": 22
+    },
+    {
+     "dept": "I/P & ED",
+     "totalHours": 139.0,
+     "otHours": 13.5,
+     "count": 15
+    },
+    {
+     "dept": "Purchasing",
+     "totalHours": 118.5,
      "otHours": 0.0,
-     "count": 23
+     "count": 16
     },
     {
-     "dept": "Product Development and Technical Service Platform",
-     "totalHours": 121.5,
-     "otHours": 3.0,
-     "count": 14
+     "dept": "Design",
+     "totalHours": 97.5,
+     "otHours": 0.0,
+     "count": 12
     },
     {
-     "dept": "Pro.4 (Matching  FL, CL )",
-     "totalHours": 56.0,
-     "otHours": 4.0,
-     "count": 6
+     "dept": "Sales & Shipping",
+     "totalHours": 81.5,
+     "otHours": 0.0,
+     "count": 10
     },
     {
-     "dept": "PC",
-     "totalHours": 55.5,
-     "otHours": 13.0,
-     "count": 5
+     "dept": "A/C",
+     "totalHours": 69.0,
+     "otHours": 0.0,
+     "count": 8
+    },
+    {
+     "dept": "Management",
+     "totalHours": 65.5,
+     "otHours": 0.0,
+     "count": 9
     },
     {
      "dept": "Myanmar PC",
@@ -245,75 +287,15 @@ window.DEPT_HOURS_DATA = {
      "count": 4
     },
     {
-     "dept": "Pro.3 (Chamber  Asm.  Line)",
-     "totalHours": 42.5,
-     "otHours": 7.0,
-     "count": 4
-    },
-    {
-     "dept": "Pro.4",
-     "totalHours": 39.5,
-     "otHours": 6.0,
-     "count": 4
-    },
-    {
-     "dept": "Pro.3",
-     "totalHours": 30.0,
-     "otHours": 5.0,
-     "count": 3
-    },
-    {
-     "dept": "Pro.3 (Press  Section)",
-     "totalHours": 29.0,
+     "dept": "SPC",
+     "totalHours": 25.5,
      "otHours": 0.0,
      "count": 3
-    },
-    {
-     "dept": "Management  Department",
-     "totalHours": 24.5,
-     "otHours": 0.0,
-     "count": 4
     },
     {
      "dept": "Myanmar Pro.6",
      "totalHours": 24.0,
      "otHours": 6.0,
-     "count": 2
-    },
-    {
-     "dept": "Pro.2 (B  Line)",
-     "totalHours": 22.5,
-     "otHours": 6.0,
-     "count": 2
-    },
-    {
-     "dept": "Pro.4 (Frame WL Line)",
-     "totalHours": 22.5,
-     "otHours": 5.0,
-     "count": 2
-    },
-    {
-     "dept": "Pro.2 (Assembly Section)",
-     "totalHours": 22.5,
-     "otHours": 5.0,
-     "count": 2
-    },
-    {
-     "dept": "QA  Department",
-     "totalHours": 16.5,
-     "otHours": 0.0,
-     "count": 2
-    },
-    {
-     "dept": "Engineering Development (Pro. Process)",
-     "totalHours": 16.5,
-     "otHours": 0.0,
-     "count": 2
-    },
-    {
-     "dept": "Purchasing (BOI & Import)",
-     "totalHours": 16.5,
-     "otHours": 0.0,
      "count": 2
     },
     {
@@ -323,33 +305,9 @@ window.DEPT_HOURS_DATA = {
      "count": 1
     },
     {
-     "dept": "Pro.2 (A  Line)",
-     "totalHours": 11.0,
-     "otHours": 2.0,
-     "count": 1
-    },
-    {
-     "dept": "Investment (Die Maintenance & New Model)",
-     "totalHours": 11.0,
-     "otHours": 2.0,
-     "count": 1
-    },
-    {
-     "dept": "Pro.4 (C-Shaft FL,CL  Line)",
-     "totalHours": 11.0,
-     "otHours": 2.0,
-     "count": 1
-    },
-    {
-     "dept": "P/E (Maintenance 2nd Floor & Break down)",
-     "totalHours": 10.5,
-     "otHours": 2.0,
-     "count": 1
-    },
-    {
-     "dept": "Sales Admin & Shipping",
+     "dept": "MBS",
      "totalHours": 9.0,
-     "otHours": 0.0,
+     "otHours": 0.5,
      "count": 1
     },
     {
@@ -365,62 +323,20 @@ window.DEPT_HOURS_DATA = {
      "count": 1
     },
     {
-     "dept": "Pro.2 (Qualiity Control Line)",
+     "dept": "Product Development and Technical Service Platform",
      "totalHours": 8.5,
      "otHours": 0.0,
      "count": 1
     },
     {
-     "dept": "Shipping",
-     "totalHours": 8.5,
-     "otHours": 0.0,
-     "count": 1
-    },
-    {
-     "dept": "Pro.1 (Motor  Inverter  Sub Line)",
-     "totalHours": 8.0,
-     "otHours": 0.0,
-     "count": 1
-    },
-    {
-     "dept": "QA (Inspection Inprocess Pro.3-6)",
-     "totalHours": 8.0,
-     "otHours": 0.0,
-     "count": 1
-    },
-    {
-     "dept": "Design  Department",
-     "totalHours": 8.0,
-     "otHours": 0.0,
-     "count": 1
-    },
-    {
-     "dept": "Sales Admin.",
-     "totalHours": 8.0,
-     "otHours": 0.0,
-     "count": 1
-    },
-    {
-     "dept": "PC (Planning)",
-     "totalHours": 8.0,
-     "otHours": 0.0,
-     "count": 1
-    },
-    {
-     "dept": "Production Engineering Section",
-     "totalHours": 8.0,
-     "otHours": 0.0,
-     "count": 1
-    },
-    {
-     "dept": "Purchasing (Local Purchasing)",
+     "dept": "P/R",
      "totalHours": 8.0,
      "otHours": 0.0,
      "count": 1
     }
    ],
-   "totalHours": 11738.0,
-   "totalOt": 2137.0
+   "totalHours": 10954.0,
+   "totalOt": 2021.0
   }
  }
 };
